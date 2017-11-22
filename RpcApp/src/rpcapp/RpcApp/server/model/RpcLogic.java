@@ -25,4 +25,8 @@ public class RpcLogic {
     public int getTotal(int current, int round){
         return current + round;
     }
+    
+    public String toString(int x){
+        return Integer.toString(x);
+    }
 }

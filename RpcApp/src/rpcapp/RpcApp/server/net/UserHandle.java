@@ -6,7 +6,14 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import rpcapp.RpcApp.server.model.RpcLogic;
 
 /**
@@ -15,10 +22,8 @@ import rpcapp.RpcApp.server.model.RpcLogic;
 public class UserHandle implements Runnable {
 
     private final String username = "Player: ";
-    private BufferedReader fromClient;
     private PrintWriter toClient;
     private final Server server;
-    private final Socket clientSocket;
     public boolean gamestarted = false;
     private volatile boolean connected = false;
     private boolean firsttime = true;
@@ -27,11 +32,19 @@ public class UserHandle implements Runnable {
     private String myChoice;
     private List<String> allPicks;
     RpcLogic logic = new RpcLogic();
+    private final SocketChannel channel;
+    private final ByteBuffer fromClient = ByteBuffer.allocateDirect(1024);
+
+    private String entry;
 
     //Creates a new instance, sets connected to true for user
-    UserHandle(Server server, Socket clientSocket) {
+    UserHandle(Server server, SocketChannel channel) throws IOException {
         this.server = server;
-        this.clientSocket = clientSocket;
+        this.channel = channel;
+        synchronized (server) {
+            server.addConnected();
+        }
+
         connected = true;
 
     }
@@ -43,22 +56,15 @@ public class UserHandle implements Runnable {
     @Override
     public void run() {
 
-        try {
-            boolean autoFlush = true;
-            fromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            toClient = new PrintWriter(clientSocket.getOutputStream(), autoFlush);
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(ioe);
-        }
-
         while (connected) {
-
             if (server.countPlayers() > 1) {
                 //Only display welcome message first time
                 if (firsttime) {
-                    toClient.println("Welcome, make a pick (rock/paper/scissors)");
-                    toClient.println("Round Score: " + roundscore);
-                    toClient.println("Total Score: " + totalscore);
+                    String rs = logic.toString(roundscore);
+                    String ts = logic.toString(totalscore);
+                    display("Welcome, make a pick (rock/paper/scissors)");
+                    display("Round Score: ");
+                    display("Total Score: ");
                     firsttime = false;
                 }
 
@@ -86,27 +92,27 @@ public class UserHandle implements Runnable {
                     toClient.println("New round, pick rock/paper/scissors");
                 }
                 try {
-                    switch (fromClient.readLine()) {
+                    switch (entry) {
                         case "rock":
-                            toClient.println(username + "picked rock");
+                            display("picked rock");
                             synchronized (server) {
-                                server.addSelect(this);
+                                server.addSelect();
                                 server.addPicks("rock");
                             }
                             myChoice = "rock";
                             break;
                         case "paper":
-                            toClient.println(username + "picked paper");
+                            display("picked paper");
                             synchronized (server) {
-                                server.addSelect(this);
+                                server.addSelect();
                                 server.addPicks("paper");
                             }
                             myChoice = "paper";
                             break;
                         case "scissors":
-                            toClient.println(username + "picked scissors");
+                            display("picked scissors");
                             synchronized (server) {
-                                server.addSelect(this);
+                                server.addSelect();
                                 server.addPicks("scissors");
                             }
                             myChoice = "scissors";
@@ -115,11 +121,12 @@ public class UserHandle implements Runnable {
                             disconnectClient();
                             break;
                         default:
-                            toClient.println("Invalid input; Try again.");
+                            display("Invalid input; Try again.");
                             break;
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.err.println("Connection lost");
+                    e.printStackTrace();
                     connected = false;
 
                 }
@@ -129,11 +136,13 @@ public class UserHandle implements Runnable {
                 //Before the user has started only 'start' and 'quit' can be chosen
             } else {
                 try {
-                    switch (fromClient.readLine()) {
+                    switch (entry) {
                         case "start":
-                            server.addPlayers(this);
+                            synchronized(server){
+                            server.addPlayers();
+                            }
                             if (server.countPlayers() < 2) {
-                                toClient.println("Waiting for other player/s");
+                                display("Waiting for other player/s");
                             }
 
                             while (server.countPlayers() < 2) {
@@ -141,22 +150,26 @@ public class UserHandle implements Runnable {
                             break;
                         case "quit":
                             disconnectClient();
-
                             break;
                         default:
-                            toClient.println("Enter 'start' to start game, or 'quit' to quit");
+                            display("Enter 'start' to start game, or 'quit' to quit");
                             break;
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     System.err.println("Connection lost");
-                    disconnectClient();
+                    try {
+                        disconnectClient();
+                    } catch (IOException ex) {
+                        Logger.getLogger(UserHandle.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
                 }
             }
         }
     }
 
-    //Duscinnect client from server.
+    /*
+    //Disconnect client from server.
     private void disconnectClient() {
         connected = false;
         synchronized (server) {
@@ -169,4 +182,34 @@ public class UserHandle implements Runnable {
         }
 
     }
+     */
+    void recvMsg() throws IOException {
+        fromClient.clear();
+        int numOfReadBytes = channel.read(fromClient);
+        if (numOfReadBytes == -1) {
+            throw new IOException("Client has closed connection.");
+        }
+        fromClient.flip();
+        byte[] bytes = new byte[fromClient.remaining()];
+        fromClient.get(bytes);
+        String recvdString = new String(bytes);
+        entry = recvdString;
+        ForkJoinPool.commonPool().execute(this);
+    }
+
+    void sendMsg(ByteBuffer msg) throws IOException {
+        channel.write(msg);
+        if (msg.hasRemaining()) {
+            throw new IOException("Could not send message");
+        }
+    }
+
+    void display(String message) {
+        server.showToUser(channel, message);
+    }
+
+    void disconnectClient() throws IOException {
+        channel.close();
+    }
+
 }

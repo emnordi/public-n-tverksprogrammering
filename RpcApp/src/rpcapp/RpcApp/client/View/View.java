@@ -2,16 +2,19 @@ package rpcapp.RpcApp.client.View;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetSocketAddress;
 import java.util.Scanner;
-import rpcapp.RpcApp.client.Controller.Controller;
-
+import rpcapp.RpcApp.client.Net.ClientCon;
+import rpcapp.RpcApp.client.Net.Listener;
 /**
  * Reads commands inputed by the user and runs a separate thread.
  */
 public class View implements Runnable {
 
     private boolean getCommand = false;
-    private Controller contr;
+    private ClientCon server;
+    public boolean cansend;
+    
 
     /*
     * Starts reader and waits for user input. 
@@ -21,7 +24,8 @@ public class View implements Runnable {
             return;
         }
         getCommand = true;
-        contr = new Controller();
+        cansend = true;
+        server = new ClientCon();
         new Thread(this).start();
     }
 
@@ -31,28 +35,55 @@ public class View implements Runnable {
      */
     @Override
     public void run() {
-        contr.connect();
+        server.connect(new InetSocketAddress("127.0.0.1", 8000));
+        server.addListener(new ConsoleOutput());
         while (getCommand) {
             Scanner sc = new Scanner(System.in);
             String s = sc.nextLine();
+            if(!cansend && !s.equals("quit")){
+                toClient("You cannot write anyting else right now (except quit)");
+                continue;
+            }
             switch (s) {
                 case "start":
                     System.out.println("Game started");
-                    contr.putEntry("start");
+                    server.putEntry("start");
                     break;
                 case "quit":
-                    contr.putEntry("quit");
-                    System.out.println("Good Bye!");
+                    server.putEntry("quit");
+                    toClient("Good Bye!");
                     getCommand = false;
                     try {
-                        contr.disconnect();
+                        server.disconnect();
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                 default:
-                    contr.putEntry(s);
+                    server.putEntry(s);
                     break;
             }
         }
     }
+    
+        
+        synchronized void toClient(String output) {
+            System.out.println(output);
+        }
+        
+        private class ConsoleOutput implements Listener {
+        @Override
+        public void recvdMsg(String msg) {
+            toClient(msg);
+        }
+
+        @Override
+        public void disconnected() {
+            printToConsole("Disconnected from server.");
+        }
+
+        private void printToConsole(String output) {
+            toClient(output);
+        }
+    }
+    
 }
