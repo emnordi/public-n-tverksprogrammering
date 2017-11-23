@@ -143,7 +143,7 @@ public class ClientCon implements Runnable {
         fromServ.get(bytes);
         String msg = new String(bytes);
         toClie(msg);
-        
+
     }
     
     

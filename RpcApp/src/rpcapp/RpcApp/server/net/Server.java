@@ -22,13 +22,12 @@ public class Server {
 
     private volatile int readyPlayers;
     private volatile int selectedPickers;
-    private volatile int scoreCalculated;
-    private volatile int connectedPlayers;
     private List<String> selectedPicks = new ArrayList<>();
+    private final List<String> pickChecked = new ArrayList<>();
     private Selector selector;
     RpcLogic logic = new RpcLogic();
     private ServerSocketChannel serverChannel;
-    
+    private final List<SocketChannel> allChannels = new ArrayList<>();
 
     public static void main(String[] args) {
         Server serv = new Server();
@@ -38,13 +37,11 @@ public class Server {
     private void serve() {
         try {
             initialize();
-            connectedPlayers = 0;
             readyPlayers = 0;
-            scoreCalculated = 0;
             selectedPickers = 0;
             while (true) {
                 selector.select();
-
+                //Iterate over the keys to check what to do
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
                     SelectionKey key = iterator.next();
@@ -65,12 +62,11 @@ public class Server {
                     }
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
+    //Initialize the selector and Server socket channel
     private void initialize() throws IOException {
         selector = Selector.open();
         //open channel
@@ -83,14 +79,15 @@ public class Server {
         serverChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
-    void showToUser(SocketChannel channel, String msg){
+    //Used to display a message to a specific user
+    void showToUser(SocketChannel channel, String msg) {
         SelectionKey key = channel.keyFor(selector);
-        Client client = (Client) key.attachment();
+        User user = (User) key.attachment();
         key.interestOps(SelectionKey.OP_WRITE);
-        client.queueMsgToSend(sendMsg(msg));
+        user.queueMsg(sendMsg(msg));
         selector.wakeup();
     }
-    
+
     //Adds a user to a list of all players that have entered "start"
     public void addPlayers() {
         readyPlayers++;
@@ -98,23 +95,65 @@ public class Server {
 
     //Returns the amount of players that are ready to play
     public int countPlayers() {
-       return readyPlayers;
+        return readyPlayers;
     }
 
     //Adds a users choice(rock/paper/scissors) to a list 
     public void addPicks(String pick) {
-        selectedPicks.add(pick);
+        synchronized (selectedPicks) {
+            selectedPicks.add(pick);
+            //When all players have made a selection the scores can be calculated
+            if (selectedPicks.size() == allChannels.size()) {
+                for (SocketChannel chan : allChannels) {
+                    SelectionKey key = chan.keyFor(selector);
+                    if (key.isValid()) {
+                        User user = (User) key.attachment();
+                        UserHandle handle = user.handler;
+                        handle.scoring(selectedPicks);
+                    }
+                }
+
+            }
+            synchronized (pickChecked) {
+                pickChecked.add(pick);
+                if (pickChecked.size() == allChannels.size()) {
+                    selectedPicks.clear();
+                    pickChecked.clear();
+                }
+            }
+        }
     }
 
     //Returns the list of all the users picks(rock/paper/scissors) for the round.
     public List<String> getPicks() {
         return selectedPicks;
     }
-    public int getConnected(){
-        return connectedPlayers;
-    }
-    public void addConnected(){
-       connectedPlayers++;
+
+    //Adds the users channel when "start" is typed, if there are more than one player the game is started
+    public void addChannel(SocketChannel channel) {
+        synchronized (allChannels) {
+            allChannels.add(channel);
+            if (allChannels.size() < 2) {
+                showToUser(channel, "Waiting for more player/s");
+            } else if (allChannels.size() == 2) {
+                for (SocketChannel chan : allChannels) {
+                    SelectionKey key = chan.keyFor(selector);
+                    if (key.isValid()) {
+                        User user = (User) key.attachment();
+                        UserHandle handle = user.handler;
+                        handle.firstdisp();
+                    }
+
+                }
+            } else if (allChannels.size() > 2) {
+                SelectionKey key = channel.keyFor(selector);
+                if (key.isValid()) {
+                    User user = (User) key.attachment();
+                    UserHandle handle = user.handler;
+                    handle.firstdisp();
+                }
+            }
+        }
     }
 
     //Remove user from list if disconnected
@@ -123,27 +162,6 @@ public class Server {
         if (selectedPickers > readyPlayers) {
             selectedPickers--;
         }
-
-    }
-
-    /*
-    * Clears the list of picks, users who've made selects and users with
-    * with calculated scores for the next round.
-     */
-    public void clearer() {
-        selectedPicks.clear();
-        scoreCalculated = 0;
-        selectedPickers = 0;
-    }
-
-    //Adds a user to the list of users who are calculated their score.
-    public void addCalc(UserHandle user) {
-        scoreCalculated++;
-    }
-
-    //Returns the size of the list of users who have calculated their score.
-    public int countCalc() {
-        return scoreCalculated;
     }
 
     //Adds user to list of users who have selected a pick (rock/paper/scissors).
@@ -151,11 +169,7 @@ public class Server {
         selectedPickers++;
     }
 
-    //Returns the amount of users who have selected a pick(rock/paper/scissors).
-    public int countPickers() {
-        return selectedPickers;
-    }
-
+    //Creates UserHandle
     private void startHandler(SelectionKey key) throws IOException {
         ServerSocketChannel socketChannel = (ServerSocketChannel) key.channel();
         //Establish connection
@@ -165,26 +179,26 @@ public class Server {
         //Creating an instace of the UserHandle
         UserHandle handler = new UserHandle(this, clientChannel);
         //UserHandle reference passed to Client 
-        clientChannel.register(selector, SelectionKey.OP_WRITE, new Client(handler));
+        clientChannel.register(selector, SelectionKey.OP_WRITE, new User(handler));
         //Set linger
         clientChannel.setOption(StandardSocketOptions.SO_LINGER, 5000);
-        
+
     }
 
     private ByteBuffer sendMsg(String msg) {
         return ByteBuffer.wrap(msg.getBytes());
     }
-
-    private class Client {
+    //Class for each users UserHandle
+    private class User {
 
         private final UserHandle handler;
         private final Queue<ByteBuffer> toClient = new ArrayDeque<>();
 
-        private Client(UserHandle handler) {
+        private User(UserHandle handler) {
             this.handler = handler;
 
         }
-        private void queueMsgToSend(ByteBuffer msg) {
+        private void queueMsg(ByteBuffer msg) {
             synchronized (toClient) {
                 toClient.add(msg.duplicate());
             }
@@ -201,28 +215,28 @@ public class Server {
     }
 
     private void removeClient(SelectionKey clientKey) throws IOException {
-        Client client = (Client) clientKey.attachment();
+        User client = (User) clientKey.attachment();
         client.handler.disconnectClient();
         clientKey.cancel();
     }
 
     private void recvFromClient(SelectionKey key) throws IOException {
-        Client client = (Client) key.attachment();
+        User user = (User) key.attachment();
         try {
-            client.handler.recvMsg();
-        } catch (IOException clientHasClosedConnection) {
+            user.handler.recvMsg();
+        } catch (IOException e) {
             removeClient(key);
         }
     }
-    
+
     private void sendToClient(SelectionKey key) throws IOException {
         //Retrieve instance of client object
-        Client client = (Client) key.attachment();
+        User user = (User) key.attachment();
         try {
-            client.sendMsgs();
+            user.sendMsgs();
             //If message sent then change interest to read
             key.interestOps(SelectionKey.OP_READ);
-        } catch (IOException clientHasClosedConnection) {
+        } catch (IOException e) {
             removeClient(key);
         }
     }
