@@ -111,7 +111,6 @@ public class UserHandle implements Runnable {
     }
 //Welcome message only shown on first start
     public void firstdisp() {
-        
         if (firsttime) {
             rs = logic.toString(roundscore);
             ts = logic.toString(totalscore);
@@ -126,14 +125,16 @@ public class UserHandle implements Runnable {
             //Get the user's score for the round and the total score for the user
             roundscore = logic.getWinner(allPicks, myPick);
             totalscore = logic.getTotal(totalscore, roundscore);
-
             rs = logic.toString(roundscore);
             ts = logic.toString(totalscore);
+            synchronized (server) {
+            server.pickCheckedAdd();
+            }
             display("Round Score: " + rs + " Total Score: " + ts + "\n" +
                     "New round, pick rock/paper/scissors");
         
     }
-    //A new entry is put in <code>entry</code> and the run method will be executed
+    //A new entry is put in <code>entry</code> and the run method will be executed by forkjoinpool
     void recvMsg() throws IOException {
         fromClient.clear();
         int bytesRead = channel.read(fromClient);
@@ -160,7 +161,7 @@ public class UserHandle implements Runnable {
     }
 
     void disconnectClient() throws IOException {
-        server.dcUser();
+        server.dcUser(channel);
         channel.close();
     }
 

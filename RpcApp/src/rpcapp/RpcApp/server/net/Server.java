@@ -23,7 +23,7 @@ public class Server {
     private volatile int readyPlayers;
     private volatile int selectedPickers;
     private List<String> selectedPicks = new ArrayList<>();
-    private final List<String> pickChecked = new ArrayList<>();
+    private int pickChecked;
     private Selector selector;
     RpcLogic logic = new RpcLogic();
     private ServerSocketChannel serverChannel;
@@ -39,6 +39,7 @@ public class Server {
             initialize();
             readyPlayers = 0;
             selectedPickers = 0;
+            pickChecked = 0;
             while (true) {
                 selector.select();
                 //Iterate over the keys to check what to do
@@ -66,6 +67,7 @@ public class Server {
             e.printStackTrace();
         }
     }
+
     //Initialize the selector and Server socket channel
     private void initialize() throws IOException {
         selector = Selector.open();
@@ -101,6 +103,7 @@ public class Server {
     //Adds a users choice(rock/paper/scissors) to a list 
     public void addPicks(String pick) {
         synchronized (selectedPicks) {
+            //The list of all the users picks(rock/paper/scissors) for the round.
             selectedPicks.add(pick);
             //When all players have made a selection the scores can be calculated
             if (selectedPicks.size() == allChannels.size()) {
@@ -114,19 +117,18 @@ public class Server {
                 }
 
             }
-            synchronized (pickChecked) {
-                pickChecked.add(pick);
-                if (pickChecked.size() == allChannels.size()) {
-                    selectedPicks.clear();
-                    pickChecked.clear();
-                }
+
+            if (pickChecked == allChannels.size()) {
+                selectedPicks.clear();
+                pickChecked = 0;
             }
+
         }
     }
 
-    //Returns the list of all the users picks(rock/paper/scissors) for the round.
-    public List<String> getPicks() {
-        return selectedPicks;
+    //Used to check when its okay to clear the picks(after everyone is done calculating)
+    public void pickCheckedAdd() {
+        pickChecked++;
     }
 
     //Adds the users channel when "start" is typed, if there are more than one player the game is started
@@ -157,10 +159,10 @@ public class Server {
     }
 
     //Remove user from list if disconnected
-    public void dcUser() {
-        readyPlayers--;
-        if (selectedPickers > readyPlayers) {
-            selectedPickers--;
+    public void dcUser(SocketChannel channel) {
+        allChannels.remove(channel);
+        if (pickChecked > allChannels.size()) {
+            pickChecked--;
         }
     }
 
@@ -178,7 +180,7 @@ public class Server {
         clientChannel.configureBlocking(false);
         //Creating an instace of the UserHandle
         UserHandle handler = new UserHandle(this, clientChannel);
-        //UserHandle reference passed to Client 
+        //UserHandle reference passed to User 
         clientChannel.register(selector, SelectionKey.OP_WRITE, new User(handler));
         //Set linger
         clientChannel.setOption(StandardSocketOptions.SO_LINGER, 5000);
@@ -188,6 +190,7 @@ public class Server {
     private ByteBuffer sendMsg(String msg) {
         return ByteBuffer.wrap(msg.getBytes());
     }
+
     //Class for each users UserHandle
     private class User {
 
@@ -198,11 +201,13 @@ public class Server {
             this.handler = handler;
 
         }
+
         private void queueMsg(ByteBuffer msg) {
             synchronized (toClient) {
                 toClient.add(msg.duplicate());
             }
         }
+
         private void sendMsgs() throws IOException {
             ByteBuffer msg = null;
             synchronized (toClient) {
