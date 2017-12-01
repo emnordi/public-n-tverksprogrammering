@@ -10,6 +10,7 @@ import fileCatalog.all.Fserver;
 import fileCatalog.all.Fclient;
 import fileCatalog.all.UserCredentials;
 import fileCatalog.server.fileHandler.FileHandle;
+import fileCatalog.server.integration.FileDAO;
 import fileCatalog.server.model.DatabaseHandle;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,27 +28,30 @@ import java.util.logging.Logger;
  * @author Emil
  */
 public class Controller extends UnicastRemoteObject implements Fserver {
-
+    private final FileDAO filedb;
     public Controller() throws RemoteException {
+        filedb = new FileDAO();
     }
+    
     private final DatabaseHandle dbhandle = new DatabaseHandle();
     private final FileHandle fhandle = new FileHandle();
 
     @Override
-    public long login(Fclient remote, UserCredentials cred) {
-        long userId = dbhandle.createParticipant(remote, cred);
-        dbhandle.broadcast("Welcome!", userId);
-        return userId;
+    public boolean login(Fclient remote, UserCredentials cred) {
+        boolean username = dbhandle.loginUser(remote, cred);
+        //dbhandle.broadcast("Welcome!", username);
+        return username;
+    }
+    @Override
+    public String register(Fclient remote, UserCredentials cred) {
+        String username = dbhandle.registerUser(remote, cred);
+        dbhandle.broadcast("Welcome!", username);
+        return username;
     }
 
     @Override
-    public void logout(long id) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public long register(Fclient remote, UserCredentials cred) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void logout(Fclient remote, String username) throws RemoteException {
+        dbhandle.logoutUser(remote, username);
     }
 
     @Override
@@ -56,8 +60,8 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void sendMsg(long id, String msg) throws RemoteException {
-        dbhandle.broadcast(msg, id);
+    public void sendMsg(String username, String msg) throws RemoteException {
+        dbhandle.broadcast(msg, username);
     }
 
     @Override
@@ -80,10 +84,10 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void read(String path, long id) throws RemoteException {
+    public void read(String path, String username) throws RemoteException {
         try {
             String cont = fhandle.read(path);
-            dbhandle.broadcast(cont, id);
+            dbhandle.broadcast(cont, username);
         } catch (IOException ioe) {
             throw new UncheckedIOException(ioe);
         } catch (ClassNotFoundException ex) {
@@ -92,17 +96,17 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void list(String path, long id) throws RemoteException {
+    public void list(String path, String username) throws RemoteException {
         try {
             String cont = fhandle.listDir(path);
-            dbhandle.broadcast(cont, id);
+            dbhandle.broadcast(cont, username);
         } catch (IOException ex) {
             System.err.println("Could not list");
         }
     }
 
     @Override
-    public void createDir(String path, long id) throws RemoteException {
+    public void createDir(String path, String username) throws RemoteException {
         try {
             fhandle.makeDirectory(path);
         } catch (IOException ioe) {
@@ -111,7 +115,7 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void deleteDir(String path, long id) throws RemoteException {
+    public void deleteDir(String path, String username) throws RemoteException {
         try {
             fhandle.deleteDirectory(path);
         } catch (IOException ioe) {

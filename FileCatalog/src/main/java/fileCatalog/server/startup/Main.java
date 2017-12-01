@@ -9,24 +9,28 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import fileCatalog.server.controller.Controller;
+import fileCatalog.server.integration.FileDAO;
 import java.net.MalformedURLException;
 /**
  *
  * @author Emil
  */
 public class Main {
-    
     public static void main(String[] args){
         try {
             new Main().startReg();
             Naming.rebind(Controller.RegName, new Controller());
+           // new Main().startdb();
         } catch (RemoteException | MalformedURLException ex) {
             System.out.println("Server not started");
         }
     }
+    /*
+    private void startdb() throws RemoteException{
+        Controller cont = new Controller();
+        cont.startDb();
+    }*/
     
     private void startReg() throws RemoteException{
         try{

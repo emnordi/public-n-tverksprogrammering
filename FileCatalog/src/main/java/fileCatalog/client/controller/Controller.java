@@ -1,27 +1,19 @@
+/*
 package fileCatalog.client.controller;
 
-import fileCatalog.all.Fclient;
 import fileCatalog.all.Fserver;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.CompletableFuture;
 import fileCatalog.server.fileHandler.FileHandle;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.nio.channels.FileChannel;
 import java.util.function.Consumer;
-import fileCatalog.all.UserCredentials;
+import fileCatalog.server.integration.FileDAO;
 
-/**
- *
- * @author Emil
- */
 public class Controller {
     private long userId;
     FileHandle fileHandle = new FileHandle();
     Fserver server;
-
-
+    
     public void createDir(String path) {
         CompletableFuture.runAsync(() -> {
             try {
@@ -85,3 +77,4 @@ public class Controller {
     }
 
 }
+*/

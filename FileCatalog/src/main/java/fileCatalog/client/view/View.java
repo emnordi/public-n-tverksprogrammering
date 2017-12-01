@@ -7,7 +7,6 @@ package fileCatalog.client.view;
 import fileCatalog.all.Fclient;
 import fileCatalog.all.Fserver;
 import fileCatalog.all.UserCredentials;
-import fileCatalog.client.controller.Controller;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.MalformedURLException;
@@ -26,9 +25,8 @@ import java.util.function.Consumer;
  */
 public class View implements Runnable{
     private boolean readFromUser;
-    private Controller contr;
     private MngOut out = new MngOut();
-    private long userId;
+    private String username;
     private Fserver serv;
     String[] fileAndString;
     String[] userAndPass;
@@ -44,7 +42,6 @@ public class View implements Runnable{
             return;
         }
         readFromUser = true;
-        contr = new Controller();
         new Thread(this).start();
         out.println("Welcome, make an action");
     }
@@ -60,33 +57,50 @@ public class View implements Runnable{
                     case "quit":
                         readFromUser = false;
                         break;
+                    case "register":
+                        servlookup("127.0.0.1");
+                        userAndPass = commands[1].split(" ", 2);
+                        username = serv.register(remoteObject, new UserCredentials(userAndPass[0], userAndPass[1]));
+                        out.println(username);
+                        if(username.equals("UserAlreadyExists")){
+                            out.println("Name taken, please enter another");
+                        }
+                        break;
                     case "login":
                         servlookup("127.0.0.1");
                         userAndPass = commands[1].split(" ", 2);
-                        userId = serv.login(remoteObject, new UserCredentials(userAndPass[0], userAndPass[1]));
-                        System.out.println(userId);
+                        boolean verified = serv.login(remoteObject, new UserCredentials(userAndPass[0], userAndPass[1]));
+                        if(verified){
+                            username = userAndPass[0];
+                           out.println("You are logged on: " + username);
+                        }else{
+                            out.println("Invalid username/password");
+                        }
+                        break;
+                    case "logout":
+                        
                         break;
                     case "createdir":
-                        serv.createDir(commands[1], userId);
+                        serv.createDir(commands[1], username);
                         out.println("Directory " + commands[1] + " created");
                         break;
                     case "deletedir":
-                        serv.deleteDir(commands[1], userId);
+                        serv.deleteDir(commands[1], username);
                         out.println("Directory " + commands[1] + " deleted");
                         break;
                     case "list":
-                       serv.list(commands[1], userId);
+                       serv.list(commands[1], username);
                         break;
                     case "write":
                        fileAndString = commands[1].split(" ", 2);
                        serv.updatefile(fileAndString[0], fileAndString[1]);
                         break;
                     case "read":
-                        serv.read(commands[1], userId);
+                        serv.read(commands[1], username);
                         break;
                     case "copy":
                         fileAndString = commands[1].split(" ", 2);
-                        contr.copy(fileAndString[0], fileAndString[1]);
+                        //contr.copy(fileAndString[0], fileAndString[1]);
                         break;
                     case "uploadfile":
                         Path dir = Paths.get("Files");

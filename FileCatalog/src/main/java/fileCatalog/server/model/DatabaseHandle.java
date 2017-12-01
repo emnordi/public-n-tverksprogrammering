@@ -7,6 +7,8 @@ package fileCatalog.server.model;
 
 import fileCatalog.all.Fclient;
 import fileCatalog.all.UserCredentials;
+import fileCatalog.server.integration.FileDAO;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,26 +21,46 @@ import java.util.Random;
 public class DatabaseHandle {
 
     private final Random idGenerator = new Random();
-    private final Map<Long, User> participants = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, User> loggedonUsers = Collections.synchronizedMap(new HashMap<>());
+    private FileDAO fdao;
 
-    public long createParticipant(Fclient remoteNode, UserCredentials credentials) {
-        long userId = idGenerator.nextLong();
-        User newUser = new User(userId, credentials.getUsername(),
-                remoteNode, this);
-        participants.put(userId, newUser);
-        return userId;
+    public String registerUser(Fclient remoteNode, UserCredentials credentials) {
+        boolean ruser;
+        fdao = new FileDAO();
+            ruser = fdao.registerUser(credentials.getUsername(), credentials.getPassword());
+            if(ruser){
+            User newUser = new User(credentials.getUsername(),
+                    remoteNode, this);
+            loggedonUsers.put(credentials.getUsername(), newUser);
+            return credentials.getUsername();
+            }else{
+                return "UserAlreadyExists";
+            }
+    }
+    public boolean loginUser(Fclient remoteNode, UserCredentials credentials){
+        fdao = new FileDAO();
+        boolean verified = fdao.authenticate(credentials.getUsername(), credentials.getPassword());
+        if(verified){
+            User newUser = new User(credentials.getUsername(), remoteNode, this);
+            loggedonUsers.put(credentials.getUsername(), newUser);
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public void logoutUser(Fclient remoteNode, String username){
+        fdao = new FileDAO();
+            broadcast("Logging out ", credentials.getUsername());
+            loggedonUsers.remove(credentials.getUsername());
     }
 
     // public User findUser(long id) {
     //    return participants.get(id);
     //}
-    public void removeParticipant(long id) {
-        participants.remove(id);
-    }
 
-    public void broadcast(String msg, long id) {
-        synchronized (participants) {
-            participants.get(id).send(msg);
+    public void broadcast(String msg, String username) {
+        synchronized (loggedonUsers) {
+            loggedonUsers.get(username).send(msg);
         }
     }
 

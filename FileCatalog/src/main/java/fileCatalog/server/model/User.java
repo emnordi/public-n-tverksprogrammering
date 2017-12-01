@@ -13,23 +13,15 @@ import java.rmi.RemoteException;
  * @author Emil
  */
 public class User {
-    private static final String DEFAULT_USERNAME = "anonymous";
-    private final long id;
     private final Fclient remoteNode;
     private final DatabaseHandle dbhandle;
-    private String username;
+    private final String username;
 
 
-    public User(long id, String username, Fclient remoteNode, DatabaseHandle mgr) {
-        this.id = id;
+    public User(String username, Fclient remoteNode, DatabaseHandle mgr) {
         this.username = username;
         this.remoteNode = remoteNode;
         this.dbhandle = mgr;
-    }
-
-
-    public User(long id, Fclient remoteNode, DatabaseHandle mgr) {
-        this(id, DEFAULT_USERNAME, remoteNode, mgr);
     }
 
     public void send(String msg) {
@@ -42,7 +34,7 @@ public class User {
 
     //Send message to user
     public void broadcast(String msg) {
-        dbhandle.broadcast(msg, id);
+        dbhandle.broadcast(msg, username);
     }
 
   

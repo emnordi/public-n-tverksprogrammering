@@ -18,27 +18,27 @@ import java.util.function.Consumer;
 public interface Fserver extends Remote{
     public static final String RegName = "File_Serv";
     //Login to application
-    long login(Fclient remote, UserCredentials cred) throws RemoteException;
+    boolean login(Fclient remote, UserCredentials cred) throws RemoteException;
     //Log out from application
-    void logout(long id) throws RemoteException;
+    void logout(String username) throws RemoteException;
     //Register user
-    long register(Fclient remote, UserCredentials cred) throws RemoteException;
+    String register(Fclient remote, UserCredentials cred) throws RemoteException;
     //Unregister user
     long unregister(Fclient remote, UserCredentials cred) throws RemoteException;
     //Send a message
-    void sendMsg(long id, String msg) throws RemoteException;
+    void sendMsg(String id, String msg) throws RemoteException;
     //Update file
     void updatefile(String file, String text) throws RemoteException;
     //Upload a file
     void uploadFile(byte[] file, String text) throws RemoteException;
     //Read from file
-    void read(String path, long id) throws RemoteException;
+    void read(String path, String username) throws RemoteException;
     //List files
-    void list(String path, long id) throws RemoteException;
+    void list(String path, String username) throws RemoteException;
     //Creates a directory
-    void createDir(String path, long id) throws RemoteException;
+    void createDir(String path, String username) throws RemoteException;
     //Deletes a directory
-    void deleteDir(String path, long id) throws RemoteException;
+    void deleteDir(String path, String username) throws RemoteException;
     
     
 }
