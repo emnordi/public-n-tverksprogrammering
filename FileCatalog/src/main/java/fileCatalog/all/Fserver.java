@@ -24,7 +24,7 @@ public interface Fserver extends Remote{
     //Register user
     String register(Fclient remote, UserCredentials cred) throws RemoteException;
     //Unregister user
-    long unregister(Fclient remote, UserCredentials cred) throws RemoteException;
+    void unregister(String username) throws RemoteException;
     //Send a message
     void sendMsg(String id, String msg) throws RemoteException;
     //Update file

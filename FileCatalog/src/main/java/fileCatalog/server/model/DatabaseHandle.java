@@ -27,37 +27,45 @@ public class DatabaseHandle {
     public String registerUser(Fclient remoteNode, UserCredentials credentials) {
         boolean ruser;
         fdao = new FileDAO();
-            ruser = fdao.registerUser(credentials.getUsername(), credentials.getPassword());
-            if(ruser){
+        ruser = fdao.registerUser(credentials.getUsername(), credentials.getPassword());
+        if (ruser) {
             User newUser = new User(credentials.getUsername(),
                     remoteNode, this);
             loggedonUsers.put(credentials.getUsername(), newUser);
             return credentials.getUsername();
-            }else{
-                return "UserAlreadyExists";
-            }
+        } else {
+            return "UserAlreadyExists";
+        }
     }
-    public boolean loginUser(Fclient remoteNode, UserCredentials credentials){
+
+    public boolean loginUser(Fclient remoteNode, UserCredentials credentials) {
         fdao = new FileDAO();
         boolean verified = fdao.authenticate(credentials.getUsername(), credentials.getPassword());
-        if(verified){
+        if (verified) {
             User newUser = new User(credentials.getUsername(), remoteNode, this);
             loggedonUsers.put(credentials.getUsername(), newUser);
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public void logoutUser(Fclient remoteNode, String username){
+
+    public void unregisterUser(String username) {
         fdao = new FileDAO();
-            broadcast("Logging out ", credentials.getUsername());
-            loggedonUsers.remove(credentials.getUsername());
+        broadcast("Unregistering " + username, username);
+        loggedonUsers.remove(username);
+        fdao.unregisterUser(username);
+
+    }
+
+    public void logoutUser(String username) {
+        broadcast("Logging out " + username, username);
+        loggedonUsers.remove(username);
     }
 
     // public User findUser(long id) {
     //    return participants.get(id);
     //}
-
     public void broadcast(String msg, String username) {
         synchronized (loggedonUsers) {
             loggedonUsers.get(username).send(msg);

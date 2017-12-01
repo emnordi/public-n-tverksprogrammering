@@ -50,13 +50,13 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void logout(Fclient remote, String username) throws RemoteException {
-        dbhandle.logoutUser(remote, username);
+    public void logout(String username) throws RemoteException {
+        dbhandle.logoutUser(username);
     }
 
     @Override
-    public long unregister(Fclient remote, UserCredentials cred) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void unregister(String username) throws RemoteException {
+       dbhandle.unregisterUser(username);
     }
 
     @Override

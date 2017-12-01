@@ -66,6 +66,13 @@ public class View implements Runnable{
                             out.println("Name taken, please enter another");
                         }
                         break;
+                    case "unregister":
+                        if(username == null){
+                            out.println("You are not logged in");
+                        }else{
+                            serv.unregister(username);
+                        }
+                        break;
                     case "login":
                         servlookup("127.0.0.1");
                         userAndPass = commands[1].split(" ", 2);
@@ -78,7 +85,7 @@ public class View implements Runnable{
                         }
                         break;
                     case "logout":
-                        serv.logout(0);
+                        serv.logout(username);
                         break;
                     case "createdir":
                         serv.createDir(commands[1], username);

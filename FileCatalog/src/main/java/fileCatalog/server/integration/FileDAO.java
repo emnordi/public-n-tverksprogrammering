@@ -78,16 +78,17 @@ public class FileDAO {
         return valid;
     }
     
-/*
-    public void unregisterUser(User account) throws BankDBException {
+
+    public void unregisterUser(String username){
         try {
-            deleteAccountStmt.setString(1, account.getHolderName());
-            deleteAccountStmt.executeUpdate();
+            deleteUserSm.setString(1, username);
+            deleteUserSm.executeUpdate();
+            
         } catch (SQLException sqle) {
-            throw new BankDBException("Could not delete the account: " + account, sqle);
+            sqle.printStackTrace();
         }
     }
-    */
+    
 
     private boolean tableExists(Connection connection, String table) throws SQLException {
         //Name is in third column
