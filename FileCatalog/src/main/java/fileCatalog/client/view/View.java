@@ -78,7 +78,7 @@ public class View implements Runnable{
                         }
                         break;
                     case "logout":
-                        
+                        serv.logout(0);
                         break;
                     case "createdir":
                         serv.createDir(commands[1], username);
