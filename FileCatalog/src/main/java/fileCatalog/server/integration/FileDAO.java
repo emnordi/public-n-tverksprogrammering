@@ -5,9 +5,7 @@
  */
 package fileCatalog.server.integration;
 
-import fileCatalog.server.fileHandler.FileHandle;
-import fileCatalog.server.model.User;
-import java.io.IOException;
+import fileCatalog.server.model.UserFile;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -15,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -32,6 +32,9 @@ public class FileDAO {
     private PreparedStatement addFileSm;
     private PreparedStatement getAccessSm;
     private PreparedStatement deleteFileSm;
+    private PreparedStatement changeWritableSm;
+    private PreparedStatement updateSizeSm;
+    private PreparedStatement getAllFilesSm;
 
     public FileDAO() {
         try {
@@ -94,35 +97,137 @@ public class FileDAO {
         }
     }
 
-    public void uploadFile(String filename, int access, String username, int filesize, int writable) {
+    public boolean uploadFile(String filename, int access, String username, int filesize, int writable) {
         try {
             addFileSm.setString(1, filename);
             addFileSm.setString(2, username);
             addFileSm.setInt(3, access);
             addFileSm.setInt(4, filesize);
             addFileSm.setInt(5, writable);
-            int rows = addFileSm.executeUpdate();
+            addFileSm.executeUpdate();
+            return true;
         } catch (SQLException sqle) {
-            sqle.printStackTrace();
+            return false;
         }
     }
+    //Checks if user has access to downloading file and then downloads
+    public boolean downloadFile(String filename, String usernam) {
+        try {
+            int acc = -1;
+            ResultSet result = null;
+            getAccessSm.setString(1, filename);
+            result = getAccessSm.executeQuery();
+            if (result.next()) {
+                acc = result.getInt("ACCESS");
+                String user = result.getString("USERNAME");
+            
+            switch (acc) {
+                case 1:
+                        return true;
+                case 0:
+                    if (user.equals(usernam)) {
+                        return true;
+                    }else{
+                        return false;
+                    }
+                default:
+                    return false;
+            }
+            }
 
-    public boolean downloadFile(String filename, int access, String username, int filesize) {
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+    public boolean updateFileContent(String filename, String usernam) {
+         try {
+            int acc = -1;
+            int writ = -1;
+            ResultSet result = null;
+            getAccessSm.setString(1, filename);
+            result = getAccessSm.executeQuery();
+            if (result.next()) {
+                acc = result.getInt("ACCESS");
+                writ = result.getInt("WRITABLE");
+                String user = result.getString("USERNAME");
+            
+            switch (acc) {
+                case 1:
+                    if (writ == 1 || user.equals(usernam)) {
+                        return true;
+                    }else{
+                        return false;
+                    }
+                case 0:
+                    if (user.equals(usernam)) {
+                        return true;
+                    }else{
+                        return false;
+                    }
+                default:
+                    return false;
+            }
+            }
+
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            return false;
+        }
+         return false;
+    }
+    
+    public boolean updateFileAccess(String filename, int access, String usernam, int write) {
         try {
             ResultSet result = null;
-            addFileSm.setString(1, filename);
-            addFileSm.setString(2, username);
-            addFileSm.setInt(3, access);
-            addFileSm.setInt(4, filesize);
-            int rows = addFileSm.executeUpdate();
+            getAccessSm.setString(1, filename);
+            result = getAccessSm.executeQuery();
+            if (result.next()) {
+                String user = result.getString("USERNAME");
+                if(user.equals(usernam)){
+                    changeAccessSm.setInt(1, access);
+                    changeAccessSm.setString(2, filename);
+                    changeAccessSm.executeUpdate();
+                    changeWritableSm.setInt(1, write);
+                    changeWritableSm.setString(2, filename);
+                    changeWritableSm.executeUpdate();
+                    return true;
+                }
+            
+            }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
+            return false;
         }
-        return true;
+        return false;
     }
-
+    public void updateSize(String filenam, int size) throws SQLException{
+        updateSizeSm.setInt(1, size);
+        updateSizeSm.setString(2, filenam);
+        updateSizeSm.executeUpdate();
+    }
+    
+    public List<UserFile> listFiles(String username){
+        List<UserFile> filelist = new ArrayList<>();
+        UserFile file;
+        ResultSet result = null;
+        try{
+            getAllFilesSm.setString(1, username);
+            getAllFilesSm.setInt(2, 1);
+            result = getAllFilesSm.executeQuery();
+            if (result.next()) {
+                file = new UserFile(result.getString("FILENAME"), result.getString("USERNAME"), result.getInt("ACCESS"), result.getInt("SIZE"));
+                filelist.add(file);
+            }
+        }catch(SQLException sqle){
+            sqle.printStackTrace();
+        }
+        return filelist;
+    }
+    
+    //Checks if the user has access to deleting the file and deletes
     public boolean deleteFile(String filename, String usernam) {
-        FileHandle fh = new FileHandle();
         try {
             int acc = -1;
             int writ = -1;
@@ -176,6 +281,7 @@ public class FileDAO {
             return false;
         }
     }
+    
 
     private void prepareStatements(Connection connection) throws SQLException {
         createUserSm = connection.prepareStatement("INSERT INTO "
@@ -194,17 +300,16 @@ public class FileDAO {
                 + " WHERE filename = ?");
         changeAccessSm = connection.prepareStatement("UPDATE "
                 + FTABLE + " SET access = ? WHERE filename = ? ");
+        changeWritableSm = connection.prepareStatement("UPDATE "
+                + FTABLE + " SET writable = ? WHERE filename = ? ");
         getAccessSm = connection.prepareStatement("SELECT * from "
                 + FTABLE + " WHERE filename = ? ");
+        getAllFilesSm = connection.prepareStatement("SELECT * from "
+                + FTABLE + " WHERE (username = ? OR access = ?) ");
+        updateSizeSm = connection.prepareStatement("UPDATE "
+                + FTABLE + " SET size = ? WHERE filename = ? ");
     }
-
-    private void listPubFiles(Connection connection) throws SQLException {
-        Statement stmt = connection.createStatement();
-        ResultSet publicFiles = stmt.executeQuery("select * from " + FTABLE + " where access = 1");
-        while (publicFiles.next()) {
-            System.out.println(publicFiles.getInt(3));
-        }
-    }
+ 
 
     private Connection databaseCon() throws ClassNotFoundException, SQLException {
         //Loads to jvm

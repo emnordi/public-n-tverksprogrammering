@@ -12,10 +12,15 @@ import fileCatalog.all.UserCredentials;
 import fileCatalog.server.fileHandler.FileHandle;
 import fileCatalog.server.integration.FileDAO;
 import fileCatalog.server.model.DatabaseHandle;
+import fileCatalog.server.model.UserFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -33,14 +38,17 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     @Override
     public boolean login(Fclient remote, UserCredentials cred) {
         boolean username = dbhandle.loginUser(remote, cred);
-        //dbhandle.broadcast("Welcome!", username);
         return username;
     }
     @Override
-    public String register(Fclient remote, UserCredentials cred) {
-        String username = dbhandle.registerUser(remote, cred);
-        dbhandle.broadcast("Welcome!", username);
-        return username;
+    public boolean register(Fclient remote, UserCredentials cred) {
+        boolean registered  = dbhandle.registerUser(remote, cred);
+        if(registered){
+        dbhandle.broadcast("Welcome " + cred.getUsername() + "!", cred.getUsername());
+        return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
@@ -59,29 +67,60 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void updatefile(String path, String content) {
-
+    public boolean updateFileContent(String path, String content, String username) {
+        boolean updatecontent = dbhandle.updateFileContent(path, username);
+        if(updatecontent){
         try {
-            fhandle.updateFile(path, content);
-        } catch (IOException | ClassNotFoundException ioe) {
+            int size = fhandle.updateFileContent(path, content);
+            dbhandle.updateSize(path, size);
+        } catch (SQLException | IOException | ClassNotFoundException ioe) {
             System.err.println("Did not work");
+        }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) {
+        try {
+            boolean uploaded = dbhandle.uploadFile(name, access, username, filesize, writable);
+            if(uploaded){
+            fhandle.uploadFile(file, name);
+            }
+            return uploaded;
+        } catch (FileNotFoundException ioe) {
+            return false;
         }
     }
 
     @Override
-    public void uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) {
+    public boolean updateFileAccess(String filename, int access, String username, int writable) throws RemoteException {
         try {
-            fhandle.uploadFile(file, name);
-            dbhandle.uploadFile(name, access, username, filesize, writable);
-        } catch (FileNotFoundException ioe) {
-            System.err.println("Did not work");
+            return dbhandle.updateFileAccess(filename, access, username, writable);
+        } catch (Exception ex) {
+            return false;
         }
     }
-
     @Override
     public boolean deleteFile(String filename, String username) throws RemoteException {
         try {
-           return dbhandle.deleteFile(filename, username);
+            boolean filedelete = dbhandle.deleteFile(filename, username);
+            if(filedelete){
+                fhandle.deleteFile(filename);
+            }
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+    @Override
+    public boolean downloadFile(String filename, String username) throws RemoteException {
+        try {
+            boolean downloaded = dbhandle.downloadFile(filename, username);
+            if(downloaded){
+                fhandle.downloadFile(filename);
+            }
+            return true;
         } catch (Exception ex) {
             return false;
         }
@@ -99,13 +138,13 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void list(String path, String username) throws RemoteException {
+    public List<UserFile> listFiles(String username) throws RemoteException {
         try {
-            String cont = fhandle.listDir(path);
-            dbhandle.broadcast(cont, username);
-        } catch (IOException ex) {
-            System.err.println("Could not list");
+            return dbhandle.listFiles(username);
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
         }
+        return null;
     }
 
     @Override

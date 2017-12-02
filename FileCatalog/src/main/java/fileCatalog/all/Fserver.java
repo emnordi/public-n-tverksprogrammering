@@ -5,10 +5,12 @@
  */
 package fileCatalog.all;
 
+import fileCatalog.server.model.UserFile;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -22,20 +24,25 @@ public interface Fserver extends Remote{
     //Log out from application
     void logout(String username) throws RemoteException;
     //Register user
-    String register(Fclient remote, UserCredentials cred) throws RemoteException;
+    boolean register(Fclient remote, UserCredentials cred) throws RemoteException;
     //Unregister user
     void unregister(String username) throws RemoteException;
     //Send a message
     void sendMsg(String id, String msg) throws RemoteException;
     //Update file
-    void updatefile(String file, String text) throws RemoteException;
+    boolean updateFileAccess(String filename, int access, String username, int writable) throws RemoteException;
+    //Write to file
+    boolean updateFileContent(String file, String text, String username) throws RemoteException;
     //Upload a file
-    void uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) throws RemoteException;
+    boolean uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) throws RemoteException;
+    //Deletes a file
     boolean deleteFile(String filename, String username) throws RemoteException;
+    //Download a file
+    boolean downloadFile(String filename, String username) throws RemoteException;
     //Read from file
     void read(String path, String username) throws RemoteException;
     //List files
-    void list(String path, String username) throws RemoteException;
+    List<UserFile> listFiles(String username) throws RemoteException;
     //Creates a directory
     void createDir(String path, String username) throws RemoteException;
     //Deletes a directory

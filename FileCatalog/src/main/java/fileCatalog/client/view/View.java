@@ -7,6 +7,7 @@ package fileCatalog.client.view;
 import fileCatalog.all.Fclient;
 import fileCatalog.all.Fserver;
 import fileCatalog.all.UserCredentials;
+import fileCatalog.server.model.UserFile;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.net.MalformedURLException;
@@ -17,6 +18,7 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 /**
@@ -59,11 +61,13 @@ public class View implements Runnable{
                         readFromUser = false;
                         break;
                     case "register":
+                        boolean registered;
                         servlookup("127.0.0.1");
                         userAndPass = commands[1].split(" ", 2);
-                        username = serv.register(remoteObject, new UserCredentials(userAndPass[0], userAndPass[1]));
-                        out.println(username);
-                        if(username.equals("UserAlreadyExists")){
+                        registered = serv.register(remoteObject, new UserCredentials(userAndPass[0], userAndPass[1]));
+                        if(registered){
+                        username = userAndPass[0];
+                        }else{
                             out.println("Name taken, please enter another");
                         }
                         break;
@@ -97,13 +101,13 @@ public class View implements Runnable{
                         serv.deleteDir(commands[1], username);
                         out.println("Directory " + commands[1] + " deleted");
                         break;
-                    case "list":
-                       serv.list(commands[1], username);
-                        break;
-                    case "write":
-                       fileAndString = commands[1].split(" ", 2);
-                       serv.updatefile(fileAndString[0], fileAndString[1]);
-                        break;
+                    case "listfiles":
+                       List<UserFile> allPubFiles = serv.listFiles(username);
+                       if(allPubFiles != null){
+                           for(UserFile u : allPubFiles){
+                               out.println("Filename: " + u.getFilename() + " Username: " + u.getUsername());
+                           }
+                       }
                     case "read":
                         serv.read(commands[1], username);
                         break;
@@ -120,7 +124,45 @@ public class View implements Runnable{
                             out.println("You do not have permission to delete this file");
                         }
                         break;
+                    case "updatefileaccess":
+                        boolean updatable = false;
+                        fileAndString = commands[1].split(" ");
+                        if(fileAndString[1].equalsIgnoreCase("private")){
+                            updatable = serv.updateFileAccess(fileAndString[0], 0, username, 0);
+                        }else if(fileAndString[1].equalsIgnoreCase("public")){
+                            int write = Integer.parseInt(fileAndString[2]);
+                            updatable = serv.updateFileAccess(fileAndString[0], 1, username, write);
+                        }else{
+                            out.println("File must be declared private or public");
+                        }
+                        if(updatable){
+                            out.println("File updated");
+                        }else{
+                            out.println("You have to be the owner of the file to update it");
+                        }
+                        
+                        break;
+                    case "updatefilecontent":
+                        fileAndString = commands[1].split(" ", 2);
+                        boolean updated = serv.updateFileContent(fileAndString[0], fileAndString[1], username);
+                        if(updated){
+                            out.println("File has been updated");
+                        }else{
+                            out.println("You do not have permission to update the file");
+                        }
+                        
+                        break;
+                    case "downloadfile":
+                        boolean downloaded;
+                        downloaded = serv.downloadFile(commands[1], username);
+                        if(downloaded){
+                            out.println("File downloaded");
+                        }else{
+                            out.println("You do not have permission to download this file");
+                        }
+                        break;
                     case "uploadfile":
+                        boolean uploadable = true;
                         fileAndString = commands[1].split(" ");
                         Path dir = Paths.get("Files");
                         Path from = dir.resolve(Paths.get(fileAndString[0]));
@@ -128,15 +170,19 @@ public class View implements Runnable{
                         int filesize = data.length;
                         System.out.println(filesize);
                         if(fileAndString[1].equalsIgnoreCase("private")){
-                            serv.uploadFile(data, fileAndString[0], 0, username, filesize, 0);
+                            uploadable = serv.uploadFile(data, fileAndString[0], 0, username, filesize, 0);
                         }else if(fileAndString[1].equalsIgnoreCase("public")){
                             int write = Integer.parseInt(fileAndString[2]);
-                            serv.uploadFile(data, fileAndString[0], 1, username, filesize, write);
+                            uploadable = serv.uploadFile(data, fileAndString[0], 1, username, filesize, write);
                         }else{
                             out.println("File must be declared private or public");
                         }
+                        if(uploadable){
+                            out.println("File uploaded");
+                        }else{
+                            out.println("There is already a file with that name");
+                        }
                         
-                        //serv.uploadFile(data, commands[1]);
                         break;
                     default:
                         out.println("Wrong input");

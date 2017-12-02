@@ -56,19 +56,17 @@ public class FileHandle {
         return dirPath.toString();
     }
 
-    public void updateFile(String path, String content) throws IOException, ClassNotFoundException {
-        String file = currentDirectory.resolve(Paths.get(path)).toString();
+    public int updateFileContent(String path, String content) throws IOException, ClassNotFoundException {
+        String file = uploadDir.resolve(Paths.get(path)).toString();
         if (type(file, ".txt")) {
             //Opens filewriter with path to file true sees that file is updated not overwritten 
             //Bufferedwriter to send several characters and pruntwriter where data is entered
             try (PrintWriter toFile = new PrintWriter(new BufferedWriter(new FileWriter(file, true)))) {
                 toFile.println(content);
             }
-        } else if (type(file, ".dat")) {
-            //writeHex(file, content);
-        } else if (type(file, ".ser")) {
-            //writeObj(file, content);
         }
+        Path nfile = uploadDir.resolve(Paths.get(path));
+        return (int) Files.size(nfile);
     }
 
     private boolean type(String file, String extension) {
@@ -128,7 +126,7 @@ public class FileHandle {
     public void downloadFile(String filename) throws FileNotFoundException {
         try {
         Path from = uploadDir.resolve(Paths.get(filename));
-        Path to = currentDirectory.resolve(Paths.get("."));
+        Path to = currentDirectory.resolve(Paths.get(filename));
         byte[] data = Files.readAllBytes(from);
         Files.write(to, data);
         }catch (IOException e) {
