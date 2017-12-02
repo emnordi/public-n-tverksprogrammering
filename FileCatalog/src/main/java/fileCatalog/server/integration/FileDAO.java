@@ -42,7 +42,7 @@ public class FileDAO {
         if (!tableExists(connection, UTABLE) && !tableExists(connection, FTABLE)) {
             Statement statement = connection.createStatement();
             statement.executeUpdate("create table " + UTABLE +  "(username varchar(50) primary key, password varchar(50))");
-            statement.executeUpdate("create table " + FTABLE +  "(username varchar(50) primary key, filename varchar(50), access int)");
+            statement.executeUpdate("create table " + FTABLE +  "(filename varchar(50) primary key, user varchar(50), access int, size int)");
         }
         return connection;
     }
@@ -114,9 +114,9 @@ public class FileDAO {
         deleteUserSm = connection.prepareStatement("DELETE FROM "
                 + UTABLE
                 + " WHERE username = ?");
-        changeAccessSm = connection.prepareStatement("UPDATE "
+/*        changeAccessSm = connection.prepareStatement("UPDATE "
                 + FTABLE
-                + " SET access = ? WHERE filename= ? ");
+                + " SET access = ? WHERE filename= ? "); */
     }
 
     private void listPubFiles(Connection connection) throws SQLException{

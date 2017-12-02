@@ -43,7 +43,7 @@ public class View implements Runnable{
         }
         readFromUser = true;
         new Thread(this).start();
-        out.println("Welcome, make an action");
+        out.println("Welcome, please log in or register");
     }
     
     @Override

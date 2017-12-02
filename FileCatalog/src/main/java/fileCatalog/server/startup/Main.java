@@ -26,11 +26,7 @@ public class Main {
             System.out.println("Server not started");
         }
     }
-    /*
-    private void startdb() throws RemoteException{
-        Controller cont = new Controller();
-        cont.startDb();
-    }*/
+
     
     private void startReg() throws RemoteException{
         try{
