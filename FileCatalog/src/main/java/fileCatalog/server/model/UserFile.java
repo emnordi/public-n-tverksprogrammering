@@ -5,11 +5,13 @@
  */
 package fileCatalog.server.model;
 
+import fileCatalog.all.FileDTO;
+
 /**
  *
  * @author Emil
  */
-public class UserFile {
+public class UserFile implements FileDTO{
     private final String filename;
     private final String username;
     private final int access;
@@ -22,15 +24,19 @@ public class UserFile {
         this.access = access;
         this.size = size;
     }
+    @Override
     public String getFilename() {
         return filename;
     }
+    @Override
     public String getUsername() {
         return username;
     }
+    @Override
     public int getAccess() {
         return access;
     }
+    @Override
     public int getSize() {
         return size;
     }

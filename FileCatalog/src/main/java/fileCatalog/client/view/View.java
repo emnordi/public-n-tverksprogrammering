@@ -5,6 +5,7 @@
  */
 package fileCatalog.client.view;
 import fileCatalog.all.Fclient;
+import fileCatalog.all.FileDTO;
 import fileCatalog.all.Fserver;
 import fileCatalog.all.UserCredentials;
 import fileCatalog.server.model.UserFile;
@@ -102,15 +103,12 @@ public class View implements Runnable{
                         out.println("Directory " + commands[1] + " deleted");
                         break;
                     case "listfiles":
-                       List<UserFile> allPubFiles = serv.listFiles(username);
+                       List<? extends FileDTO> allPubFiles = serv.listFiles(username);
                        if(allPubFiles != null){
-                           for(UserFile u : allPubFiles){
+                           for(FileDTO u: allPubFiles){
                                out.println("Filename: " + u.getFilename() + " Username: " + u.getUsername());
                            }
                        }
-                    case "read":
-                        serv.read(commands[1], username);
-                        break;
                     case "copy":
                         fileAndString = commands[1].split(" ", 2);
                         //contr.copy(fileAndString[0], fileAndString[1]);

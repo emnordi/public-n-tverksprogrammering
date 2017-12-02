@@ -6,6 +6,7 @@
 package fileCatalog.server.model;
 
 import fileCatalog.all.Fclient;
+import fileCatalog.all.FileDTO;
 import fileCatalog.all.UserCredentials;
 import fileCatalog.server.integration.FileDAO;
 import java.sql.SQLException;
@@ -38,7 +39,7 @@ public class DatabaseHandle {
        public void updateSize(String filename, int size) throws SQLException {
         fdao.updateSize(filename, size);
     }
-       public List<UserFile> listFiles(String username) throws SQLException {
+       public List<? extends FileDTO> listFiles(String username) throws SQLException {
        return fdao.listFiles(username);
     }
     

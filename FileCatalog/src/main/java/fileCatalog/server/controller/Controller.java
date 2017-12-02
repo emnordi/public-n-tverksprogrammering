@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import fileCatalog.all.FileDTO;
 
 /**
  *
@@ -138,7 +139,7 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public List<UserFile> listFiles(String username) throws RemoteException {
+    public List<? extends FileDTO> listFiles(String username) throws RemoteException {
         try {
             return dbhandle.listFiles(username);
         } catch (SQLException sqle) {

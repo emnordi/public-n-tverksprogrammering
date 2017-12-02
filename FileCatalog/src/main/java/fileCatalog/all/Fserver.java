@@ -42,7 +42,7 @@ public interface Fserver extends Remote{
     //Read from file
     void read(String path, String username) throws RemoteException;
     //List files
-    List<UserFile> listFiles(String username) throws RemoteException;
+    List<? extends FileDTO> listFiles(String username) throws RemoteException;
     //Creates a directory
     void createDir(String path, String username) throws RemoteException;
     //Deletes a directory
