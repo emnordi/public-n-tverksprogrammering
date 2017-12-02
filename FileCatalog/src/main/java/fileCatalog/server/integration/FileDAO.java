@@ -216,7 +216,7 @@ public class FileDAO {
             getAllFilesSm.setString(1, username);
             getAllFilesSm.setInt(2, 1);
             result = getAllFilesSm.executeQuery();
-            if (result.next()) {
+            while(result.next()) {
                 file = new UserFile(result.getString("FILENAME"), result.getString("USERNAME"), result.getInt("ACCESS"), result.getInt("SIZE"));
                 filelist.add(file);
             }

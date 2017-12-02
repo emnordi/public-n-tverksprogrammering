@@ -104,15 +104,24 @@ public class View implements Runnable{
                         break;
                     case "listfiles":
                        List<? extends FileDTO> allPubFiles = serv.listFiles(username);
-                       if(allPubFiles != null){
-                           for(FileDTO u: allPubFiles){
-                               out.println("Filename: " + u.getFilename() + " Username: " + u.getUsername());
-                           }
+
+                       final Object[][] table = new String[allPubFiles.size() +1][];
+                       String acc;
+                       table[0] = new String[]{"Filename:", "Owner:", "Access:", "Size:"};
+                       for(int i = 0; i < allPubFiles.size(); i++){
+                           FileDTO a = allPubFiles.get(i);
+                           String siz = Integer.toString(a.getSize());
+                           if(a.getAccess() == 1)
+                                   acc = "Public";
+                               else
+                                   acc = "Private";
+                           
+                           table[i + 1] = new String[]{a.getFilename(), a.getUsername(), acc, siz};
+                          }
+                       for(final Object[] row : table){
+                           System.out.format("%-15s%-15s%-15s%-15s\n", row);
                        }
-                    case "copy":
-                        fileAndString = commands[1].split(" ", 2);
-                        //contr.copy(fileAndString[0], fileAndString[1]);
-                        break;
+                       break;
                     case "deletefile":
                         boolean deleted;
                         deleted = serv.deleteFile(commands[1], username);
