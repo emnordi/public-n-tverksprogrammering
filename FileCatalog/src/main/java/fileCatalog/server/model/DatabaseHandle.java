@@ -19,14 +19,11 @@ import java.util.Random;
  * @author Emil
  */
 public class DatabaseHandle {
-
-    private final Random idGenerator = new Random();
     private final Map<String, User> loggedonUsers = Collections.synchronizedMap(new HashMap<>());
-    private FileDAO fdao;
+    private FileDAO fdao = new FileDAO();
 
     public String registerUser(Fclient remoteNode, UserCredentials credentials) {
         boolean ruser;
-        fdao = new FileDAO();
         ruser = fdao.registerUser(credentials.getUsername(), credentials.getPassword());
         if (ruser) {
             User newUser = new User(credentials.getUsername(),
@@ -39,7 +36,6 @@ public class DatabaseHandle {
     }
 
     public boolean loginUser(Fclient remoteNode, UserCredentials credentials) {
-        fdao = new FileDAO();
         boolean verified = fdao.authenticate(credentials.getUsername(), credentials.getPassword());
         if (verified) {
             User newUser = new User(credentials.getUsername(), remoteNode, this);
@@ -49,9 +45,15 @@ public class DatabaseHandle {
             return false;
         }
     }
+    public void uploadFile(String filename, int access, String username, int filesize, int writable){
+        fdao.uploadFile(filename, access, username, filesize, writable);
+    }
+    public boolean deleteFile(String filename, String username){
+        return fdao.deleteFile(filename, username);
+    }
+    
 
     public void unregisterUser(String username) {
-        fdao = new FileDAO();
         broadcast("Unregistering " + username, username);
         loggedonUsers.remove(username);
         fdao.unregisterUser(username);
@@ -63,9 +65,6 @@ public class DatabaseHandle {
         loggedonUsers.remove(username);
     }
 
-    // public User findUser(long id) {
-    //    return participants.get(id);
-    //}
     public void broadcast(String msg, String username) {
         synchronized (loggedonUsers) {
             loggedonUsers.get(username).send(msg);

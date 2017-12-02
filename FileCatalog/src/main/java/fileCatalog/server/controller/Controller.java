@@ -12,16 +12,10 @@ import fileCatalog.all.UserCredentials;
 import fileCatalog.server.fileHandler.FileHandle;
 import fileCatalog.server.integration.FileDAO;
 import fileCatalog.server.model.DatabaseHandle;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.rmi.RemoteException;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -75,14 +69,23 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     }
 
     @Override
-    public void uploadFile(byte[] file, String name) {
+    public void uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) {
         try {
             fhandle.uploadFile(file, name);
+            dbhandle.uploadFile(name, access, username, filesize, writable);
         } catch (FileNotFoundException ioe) {
             System.err.println("Did not work");
         }
     }
 
+    @Override
+    public boolean deleteFile(String filename, String username) throws RemoteException {
+        try {
+           return dbhandle.deleteFile(filename, username);
+        } catch (Exception ex) {
+            return false;
+        }
+    }
     @Override
     public void read(String path, String username) throws RemoteException {
         try {

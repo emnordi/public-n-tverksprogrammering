@@ -30,7 +30,8 @@ public interface Fserver extends Remote{
     //Update file
     void updatefile(String file, String text) throws RemoteException;
     //Upload a file
-    void uploadFile(byte[] file, String text) throws RemoteException;
+    void uploadFile(byte[] file, String name, int access, String username, int filesize, int writable) throws RemoteException;
+    boolean deleteFile(String filename, String username) throws RemoteException;
     //Read from file
     void read(String path, String username) throws RemoteException;
     //List files

@@ -114,7 +114,7 @@ public class FileHandle {
 
     }
 
-    //Copy a file using java.nio and transfers
+    //Uploads a file to server
     public void uploadFile(byte[] bfile, String pathTo) throws FileNotFoundException {
         Path to = uploadDir.resolve(Paths.get(pathTo));
         try {
@@ -122,6 +122,27 @@ public class FileHandle {
         }catch (IOException e) {
             e.printStackTrace();
     }
+
+}
+    //Downloads a file to server
+    public void downloadFile(String filename) throws FileNotFoundException {
+        try {
+        Path from = uploadDir.resolve(Paths.get(filename));
+        Path to = currentDirectory.resolve(Paths.get("."));
+        byte[] data = Files.readAllBytes(from);
+        Files.write(to, data);
+        }catch (IOException e) {
+            e.printStackTrace();
+    }
+
+}
+    //Deletes a file from server
+    public void deleteFile(String filePath) throws IOException {
+        Path file = uploadDir.resolve(Paths.get(filePath));
+        if (Files.exists(file)) {
+            Files.delete(file);
+        }
+        return;
 
 }
 }

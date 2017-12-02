@@ -44,6 +44,7 @@ public class View implements Runnable{
         readFromUser = true;
         new Thread(this).start();
         out.println("Welcome, please log in or register");
+        
     }
     
     @Override
@@ -83,6 +84,7 @@ public class View implements Runnable{
                         }else{
                             out.println("Invalid username/password");
                         }
+                        out.println("When uploading file enter (filename, access(public, private), writable(0/1)");
                         break;
                     case "logout":
                         serv.logout(username);
@@ -109,11 +111,32 @@ public class View implements Runnable{
                         fileAndString = commands[1].split(" ", 2);
                         //contr.copy(fileAndString[0], fileAndString[1]);
                         break;
+                    case "deletefile":
+                        boolean deleted;
+                        deleted = serv.deleteFile(commands[1], username);
+                        if(deleted){
+                            out.println("File deleted");
+                        }else{
+                            out.println("You do not have permission to delete this file");
+                        }
+                        break;
                     case "uploadfile":
+                        fileAndString = commands[1].split(" ");
                         Path dir = Paths.get("Files");
-                        Path from = dir.resolve(Paths.get(commands[1]));
+                        Path from = dir.resolve(Paths.get(fileAndString[0]));
                         byte[] data = Files.readAllBytes(from);
-                        serv.uploadFile(data, commands[1]);
+                        int filesize = data.length;
+                        System.out.println(filesize);
+                        if(fileAndString[1].equalsIgnoreCase("private")){
+                            serv.uploadFile(data, fileAndString[0], 0, username, filesize, 0);
+                        }else if(fileAndString[1].equalsIgnoreCase("public")){
+                            int write = Integer.parseInt(fileAndString[2]);
+                            serv.uploadFile(data, fileAndString[0], 1, username, filesize, write);
+                        }else{
+                            out.println("File must be declared private or public");
+                        }
+                        
+                        //serv.uploadFile(data, commands[1]);
                         break;
                     default:
                         out.println("Wrong input");
