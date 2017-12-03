@@ -12,7 +12,6 @@ import fileCatalog.all.UserCredentials;
 import fileCatalog.server.fileHandler.FileHandle;
 import fileCatalog.server.integration.FileDAO;
 import fileCatalog.server.model.DatabaseHandle;
-import fileCatalog.server.model.UserFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -114,6 +113,7 @@ public class Controller extends UnicastRemoteObject implements Fserver {
         try {
             boolean filedelete = dbhandle.deleteFile(filename, username);
             if(filedelete){
+                dbhandle.notifyUser(username, filename);
                 fhandle.deleteFile(filename);
             }
             return true;

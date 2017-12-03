@@ -95,7 +95,7 @@ public class DatabaseHandle {
     public void notifyUser(String fileAccesser, String filename) {
         synchronized (loggedonUsers) {
             if(notifyme.containsKey(filename) && loggedonUsers.containsKey(notifyme.get(filename))){
-                broadcast(fileAccesser + " is trying to update your file: " + filename, notifyme.get(filename));
+                broadcast(fileAccesser + " is accessing your file: " + filename, notifyme.get(filename));
                 
             }
         }

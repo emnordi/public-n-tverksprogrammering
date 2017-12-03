@@ -8,9 +8,6 @@ import fileCatalog.all.Fclient;
 import fileCatalog.all.FileDTO;
 import fileCatalog.all.Fserver;
 import fileCatalog.all.UserCredentials;
-import fileCatalog.server.model.UserFile;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,7 +86,6 @@ public class View implements Runnable{
                         }else{
                             out.println("Invalid username/password");
                         }
-                        out.println("When uploading file enter (filename, access(public, private), writable(0/1)");
                         break;
                     case "logout":
                         serv.logout(username);
@@ -209,6 +205,13 @@ public class View implements Runnable{
     }
 private void servlookup(String host) throws NotBoundException, MalformedURLException, RemoteException{
     serv = (Fserver) Naming.lookup("//" + host + "/" + Fserver.RegName);
+}
+void welcomeMsg(){
+     out.println("(register) When registering, enter a username and a password");
+      out.println("(login) When logging in, enter your username and password");
+       out.println("When uploading file enter (filename, access(public, private), writable(0/1)");
+        out.println("When uploading file enter (filename, access(public, private), writable(0/1)");
+       
 }
 
  private class ConsoleOutput extends UnicastRemoteObject implements Fclient {
