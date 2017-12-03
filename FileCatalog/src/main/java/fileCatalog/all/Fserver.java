@@ -5,13 +5,10 @@
  */
 package fileCatalog.all;
 
-import fileCatalog.server.model.UserFile;
-import java.io.FileInputStream;
-import java.io.FileReader;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  *

@@ -15,8 +15,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -28,7 +26,6 @@ public class FileDAO {
     private static final String FTABLE = "FILES";
     private PreparedStatement createUserSm;
     private PreparedStatement findUserSm;
-    private PreparedStatement findAllUsersSm;
     private PreparedStatement deleteUserSm;
     private PreparedStatement changeAccessSm;
     private PreparedStatement addFileSm;
@@ -72,21 +69,19 @@ public class FileDAO {
     }
 
     public boolean authenticate(String username, String password) {
-        boolean valid;
         try {
             findUserSm.setString(1, username);
             findUserSm.setString(2, password);
             ResultSet user = findUserSm.executeQuery();
             user.next();
             if (user.getString(1).equals(username)) {
-                valid = true;
+                return true;
             } else {
-                valid = false;
+                return false;
             }
         } catch (SQLException sqle) {
-            valid = false;
+            return false;
         }
-        return valid;
     }
 
     public void unregisterUser(String username) {
@@ -112,6 +107,7 @@ public class FileDAO {
             return false;
         }
     }
+
     //Checks if user has access to downloading file and then downloads
     public boolean downloadFile(String filename, String usernam) {
         try {
@@ -122,19 +118,19 @@ public class FileDAO {
             if (result.next()) {
                 acc = result.getInt("ACCESS");
                 String user = result.getString("USERNAME");
-            
-            switch (acc) {
-                case 1:
+
+                switch (acc) {
+                    case 1:
                         return true;
-                case 0:
-                    if (user.equals(usernam)) {
-                        return true;
-                    }else{
+                    case 0:
+                        if (user.equals(usernam)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    default:
                         return false;
-                    }
-                default:
-                    return false;
-            }
+                }
             }
 
         } catch (SQLException sqle) {
@@ -143,8 +139,9 @@ public class FileDAO {
         }
         return false;
     }
+
     public boolean updateFileContent(String filename, String usernam) {
-         try {
+        try {
             int acc = -1;
             int writ = -1;
             ResultSet result = null;
@@ -154,32 +151,32 @@ public class FileDAO {
                 acc = result.getInt("ACCESS");
                 writ = result.getInt("WRITABLE");
                 String user = result.getString("USERNAME");
-            
-            switch (acc) {
-                case 1:
-                    if (writ == 1 || user.equals(usernam)) {
-                        return true;
-                    }else{
+
+                switch (acc) {
+                    case 1:
+                        if (writ == 1 || user.equals(usernam)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    case 0:
+                        if (user.equals(usernam)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    default:
                         return false;
-                    }
-                case 0:
-                    if (user.equals(usernam)) {
-                        return true;
-                    }else{
-                        return false;
-                    }
-                default:
-                    return false;
-            }
+                }
             }
 
         } catch (SQLException sqle) {
             sqle.printStackTrace();
             return false;
         }
-         return false;
+        return false;
     }
-    
+
     public boolean updateFileAccess(String filename, int access, String usernam, int write) {
         try {
             ResultSet result = null;
@@ -187,7 +184,7 @@ public class FileDAO {
             result = getAccessSm.executeQuery();
             if (result.next()) {
                 String user = result.getString("USERNAME");
-                if(user.equals(usernam)){
+                if (user.equals(usernam)) {
                     changeAccessSm.setInt(1, access);
                     changeAccessSm.setString(2, filename);
                     changeAccessSm.executeUpdate();
@@ -196,7 +193,7 @@ public class FileDAO {
                     changeWritableSm.executeUpdate();
                     return true;
                 }
-            
+
             }
         } catch (SQLException sqle) {
             sqle.printStackTrace();
@@ -204,47 +201,49 @@ public class FileDAO {
         }
         return false;
     }
-    public void updateSize(String filenam, int size) throws SQLException{
+
+    public void updateSize(String filenam, int size) throws SQLException {
         updateSizeSm.setInt(1, size);
         updateSizeSm.setString(2, filenam);
         updateSizeSm.executeUpdate();
     }
-    
-    public boolean checkowner(String file, String user){
+
+    public boolean checkowner(String file, String user) {
         ResultSet result = null;
         try {
             getAccessSm.setString(1, file);
             result = getAccessSm.executeQuery();
-            if(result.next()){
-            if(result.getString("USERNAME").equals(user)){
-                return true;
-            }}
-            
+            if (result.next()) {
+                if (result.getString("USERNAME").equals(user)) {
+                    return true;
+                }
+            }
+
         } catch (SQLException sqle) {
             sqle.printStackTrace();
             return false;
         }
         return false;
     }
-    
-    public List<UserFile> listFiles(String username){
+
+    public List<UserFile> listFiles(String username) {
         List<UserFile> filelist = new ArrayList<>();
         UserFile file;
         ResultSet result = null;
-        try{
+        try {
             getAllFilesSm.setString(1, username);
             getAllFilesSm.setInt(2, 1);
             result = getAllFilesSm.executeQuery();
-            while(result.next()) {
+            while (result.next()) {
                 file = new UserFile(result.getString("FILENAME"), result.getString("USERNAME"), result.getInt("ACCESS"), result.getInt("SIZE"));
                 filelist.add(file);
             }
-        }catch(SQLException sqle){
+        } catch (SQLException sqle) {
             sqle.printStackTrace();
         }
         return filelist;
     }
-    
+
     //Checks if the user has access to deleting the file and deletes
     public boolean deleteFile(String filename, String usernam) {
         try {
@@ -257,27 +256,27 @@ public class FileDAO {
                 acc = result.getInt("ACCESS");
                 writ = result.getInt("WRITABLE");
                 String user = result.getString("USERNAME");
-            
-            switch (acc) {
-                case 1:
-                    if (writ == 1 || user.equals(usernam)) {
-                        deleteFileSm.setString(1, filename);
-                        deleteFileSm.executeUpdate();
-                        return true;
-                    }else{
+
+                switch (acc) {
+                    case 1:
+                        if (writ == 1 || user.equals(usernam)) {
+                            deleteFileSm.setString(1, filename);
+                            deleteFileSm.executeUpdate();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    case 0:
+                        if (user.equals(usernam)) {
+                            deleteFileSm.setString(1, filename);
+                            deleteFileSm.executeUpdate();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    default:
                         return false;
-                    }
-                case 0:
-                    if (user.equals(usernam)) {
-                        deleteFileSm.setString(1, filename);
-                        deleteFileSm.executeUpdate();
-                        return true;
-                    }else{
-                        return false;
-                    }
-                default:
-                    return false;
-            }
+                }
             }
 
         } catch (SQLException sqle) {
@@ -300,15 +299,12 @@ public class FileDAO {
             return false;
         }
     }
-    
 
     private void prepareStatements(Connection connection) throws SQLException {
         createUserSm = connection.prepareStatement("INSERT INTO "
                 + UTABLE + " VALUES (?, ?)");
         findUserSm = connection.prepareStatement("SELECT * from "
                 + UTABLE + " WHERE (username = ? AND password = ?)");
-        findAllUsersSm = connection.prepareStatement("SELECT * from "
-                + UTABLE);
         deleteUserSm = connection.prepareStatement("DELETE FROM "
                 + UTABLE
                 + " WHERE username = ?");
@@ -317,18 +313,17 @@ public class FileDAO {
         deleteFileSm = connection.prepareStatement("DELETE FROM "
                 + FTABLE
                 + " WHERE filename = ?");
+        getAccessSm = connection.prepareStatement("SELECT * from "
+                + FTABLE + " WHERE filename = ? ");
         changeAccessSm = connection.prepareStatement("UPDATE "
                 + FTABLE + " SET access = ? WHERE filename = ? ");
         changeWritableSm = connection.prepareStatement("UPDATE "
                 + FTABLE + " SET writable = ? WHERE filename = ? ");
-        getAccessSm = connection.prepareStatement("SELECT * from "
-                + FTABLE + " WHERE filename = ? ");
         getAllFilesSm = connection.prepareStatement("SELECT * from "
                 + FTABLE + " WHERE (username = ? OR access = ?) ");
         updateSizeSm = connection.prepareStatement("UPDATE "
                 + FTABLE + " SET size = ? WHERE filename = ? ");
     }
- 
 
     private Connection databaseCon() throws ClassNotFoundException, SQLException {
         //Loads to jvm
