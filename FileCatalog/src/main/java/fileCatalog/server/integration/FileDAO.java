@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -206,6 +208,23 @@ public class FileDAO {
         updateSizeSm.setInt(1, size);
         updateSizeSm.setString(2, filenam);
         updateSizeSm.executeUpdate();
+    }
+    
+    public boolean checkowner(String file, String user){
+        ResultSet result = null;
+        try {
+            getAccessSm.setString(1, file);
+            result = getAccessSm.executeQuery();
+            if(result.next()){
+            if(result.getString("USERNAME").equals(user)){
+                return true;
+            }}
+            
+        } catch (SQLException sqle) {
+            sqle.printStackTrace();
+            return false;
+        }
+        return false;
     }
     
     public List<UserFile> listFiles(String username){

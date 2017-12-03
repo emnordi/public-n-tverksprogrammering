@@ -56,6 +56,11 @@ public class Controller extends UnicastRemoteObject implements Fserver {
     public void logout(String username) throws RemoteException {
         dbhandle.logoutUser(username);
     }
+    
+    @Override
+    public boolean notifyaccess(String filename, String username) throws RemoteException {
+        return dbhandle.addNotify(filename, username);
+    }
 
     @Override
     public void unregister(String username) throws RemoteException {
@@ -74,11 +79,13 @@ public class Controller extends UnicastRemoteObject implements Fserver {
         try {
             int size = fhandle.updateFileContent(path, content);
             dbhandle.updateSize(path, size);
+            dbhandle.notifyUser(username, path);
+            return true;
         } catch (SQLException | IOException | ClassNotFoundException ioe) {
             System.err.println("Did not work");
         }
         }
-        return true;
+        return false;
     }
 
     @Override

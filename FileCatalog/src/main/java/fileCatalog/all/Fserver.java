@@ -23,6 +23,7 @@ public interface Fserver extends Remote{
     boolean login(Fclient remote, UserCredentials cred) throws RemoteException;
     //Log out from application
     void logout(String username) throws RemoteException;
+    boolean notifyaccess(String filename, String username) throws RemoteException;
     //Register user
     boolean register(Fclient remote, UserCredentials cred) throws RemoteException;
     //Unregister user

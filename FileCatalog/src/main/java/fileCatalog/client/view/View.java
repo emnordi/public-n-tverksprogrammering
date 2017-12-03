@@ -94,6 +94,13 @@ public class View implements Runnable{
                     case "logout":
                         serv.logout(username);
                         break;
+                    case "notifyme":
+                        if(serv.notifyaccess(commands[1], username)){
+                            out.println("You will be notified when " + commands[1] + " is updated");
+                        }else{
+                            out.println("You are not the owner of the file, cannot notify");
+                        }
+                        break;
                     case "createdir":
                         serv.createDir(commands[1], username);
                         out.println("Directory " + commands[1] + " created");

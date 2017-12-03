@@ -22,6 +22,7 @@ import java.util.Random;
  */
 public class DatabaseHandle {
     private final Map<String, User> loggedonUsers = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, String> notifyme = Collections.synchronizedMap(new HashMap<>());
     private FileDAO fdao = new FileDAO();
 
     public boolean registerUser(Fclient remoteNode, UserCredentials credentials) {
@@ -78,9 +79,27 @@ public class DatabaseHandle {
 
     public void logoutUser(String username) {
         broadcast("Logging out " + username, username);
+        notifyme.values().removeAll(Collections.singleton(username));
         loggedonUsers.remove(username);
     }
-
+    
+    public boolean addNotify(String file, String username){
+        if(fdao.checkowner(file, username)){
+        notifyme.put(file, username);
+        return true;
+        }
+        return false;
+    }
+    
+    //Send a message to the file owner if someone tries to update his file
+    public void notifyUser(String fileAccesser, String filename) {
+        synchronized (loggedonUsers) {
+            if(notifyme.containsKey(filename) && loggedonUsers.containsKey(notifyme.get(filename))){
+                broadcast(fileAccesser + " is trying to update your file: " + filename, notifyme.get(filename));
+                
+            }
+        }
+    }
     public void broadcast(String msg, String username) {
         synchronized (loggedonUsers) {
             loggedonUsers.get(username).send(msg);
