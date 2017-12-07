@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <title>Convertions</title>
+    </h:head>
+    <h:body>
+        <h:form>
+        <h:selectOneMenu value="#{currency.fromCurr}">
+            <f:selectItem itemValue="SEK" itemLabel="Swedish Crown (SEK)" />
+            <f:selectItem itemValue="GBP" itemLabel="British Pound (GBP)" />
+            <f:selectItem itemValue="USD" itemLabel="American Dollar (USD)" />
+            <f:selectItem itemValue="BTC" itemLabel="Bitcoin (BTC)" />
+        </h:selectOneMenu>
+        
+        <h:inputText id="op" value="#{currency.fromAmount}"/>
+        
+        <h:selectOneMenu value="#{currency.toCurr}">
+            <f:selectItem itemValue="SEK" itemLabel="Swedish Crown (SEK)" />
+            <f:selectItem itemValue="GBP" itemLabel="British Pound (GBP)" />
+            <f:selectItem itemValue="USD" itemLabel="American Dollar (USD)" />
+            <f:selectItem itemValue="BTC" itemLabel="Bitcoin (BTC)" />
+        </h:selectOneMenu>
+        
+        <h:outputText id="operand" value="#{currency.toAmount}"/>
+        <h:commandButton value="Convert" action="#{currency.convert}"/>
+        </h:form>
+    </h:body>
+</html>
