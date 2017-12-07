@@ -13,23 +13,34 @@ and open the template in the editor.
     </h:head>
     <h:body>
         <h:form>
-        <h:selectOneMenu value="#{currency.fromCurr}">
+            <h:outputLabel  value="From: " style= "margin-left: 1em"/>
+            <h:outputLabel  value="To: " style= "margin-left: 21em"/>
+            
+            <p>
+                <div id="fro"  style="padding: 1em; display: inline">
+            <h:selectOneMenu value="#{currency.fromCurr}">
             <f:selectItem itemValue="SEK" itemLabel="Swedish Crown (SEK)" />
             <f:selectItem itemValue="GBP" itemLabel="British Pound (GBP)" />
-            <f:selectItem itemValue="USD" itemLabel="American Dollar (USD)" />
+            <f:selectItem itemValue="USD" itemLabel="US Dollar (USD)" />
             <f:selectItem itemValue="BTC" itemLabel="Bitcoin (BTC)" />
+            <f:selectItem itemValue="EUR" itemLabel="Euro (EUR)" />
         </h:selectOneMenu>
-        
-        <h:inputText id="op" value="#{currency.fromAmount}"/>
-        
+                </div>
+        <h:inputText id="fromAmount" value="#{currency.fromAmount}"/>
+         <div id="tof"  style="padding: 1em; display: inline">
         <h:selectOneMenu value="#{currency.toCurr}">
             <f:selectItem itemValue="SEK" itemLabel="Swedish Crown (SEK)" />
             <f:selectItem itemValue="GBP" itemLabel="British Pound (GBP)" />
-            <f:selectItem itemValue="USD" itemLabel="American Dollar (USD)" />
+            <f:selectItem itemValue="USD" itemLabel="US Dollar (USD)" />
             <f:selectItem itemValue="BTC" itemLabel="Bitcoin (BTC)" />
+            <f:selectItem itemValue="EUR" itemLabel="Euro (EUR)" />
         </h:selectOneMenu>
-        
-        <h:outputText id="operand" value="#{currency.toAmount}"/>
+         </div>
+                </p>
+            <p>
+            <h:outputLabel for="toAmount" rendered="#{currency.toAmount != null}"  value="Result: "/>
+            <h:outputText id="toAmount" value="#{currency.toAmount}"/>
+            </p>
         <h:commandButton value="Convert" action="#{currency.convert}"/>
         </h:form>
     </h:body>
