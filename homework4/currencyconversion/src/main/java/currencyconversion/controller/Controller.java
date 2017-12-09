@@ -24,8 +24,8 @@ public class Controller {
     
     @EJB
     ConversionDAO cdao;
-    @EJB
-    ResultCalculator res;
+    
+    private ResultCalculator res = new ResultCalculator();
     /*
     * Calls the ConversionDAO to get the rates for the to and from currencies
     * then calculates the amount and returns it as an DTO object
