@@ -7,14 +7,15 @@ and open the template in the editor.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
     <h:head>
         <title>Convertions</title>
     </h:head>
     <h:body>
         <h:form>
             <h:outputLabel  value="From: " style= "margin-left: 1em"/>
-            <h:outputLabel  value="To: " style= "margin-left: 21em"/>
+            <h:outputLabel  value="To: " style= "margin-left: 20em"/>
             
             <p>
                 <div id="fro"  style="padding: 1em; display: inline">
@@ -26,7 +27,7 @@ and open the template in the editor.
             <f:selectItem itemValue="EUR" itemLabel="Euro (EUR)" />
         </h:selectOneMenu>
                 </div>
-        <h:inputText id="fromAmount" value="#{currency.fromAmount}"/>
+        <h:inputText id="fromAmount" value="#{currency.fromAmount}" a:placeholder="Enter value"/>
          <div id="tof"  style="padding: 1em; display: inline">
         <h:selectOneMenu value="#{currency.toCurr}">
             <f:selectItem itemValue="SEK" itemLabel="Swedish Crown (SEK)" />
@@ -39,7 +40,11 @@ and open the template in the editor.
                 </p>
             <p>
             <h:outputLabel for="toAmount" rendered="#{currency.toAmount != null}"  value="Result: "/>
+            <h:outputText id="fromAm" value="#{currency.fromAmount}"/>
+            <h:outputText id="fromCurr" value="#{currency.fromCurr}"/>
+            <h:outputLabel for="toAmount" rendered="#{currency.toAmount != null}"  value=" is "/>
             <h:outputText id="toAmount" value="#{currency.toAmount}"/>
+            <h:outputText id="toCurrency" value="#{currency.toCurrency}"/>
             </p>
         <h:commandButton value="Convert" action="#{currency.convert}"/>
         </h:form>

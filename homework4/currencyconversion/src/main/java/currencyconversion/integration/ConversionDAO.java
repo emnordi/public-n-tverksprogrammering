@@ -6,7 +6,6 @@
 package currencyconversion.integration;
 
 import currencyconversion.model.ExchangeRate;
-import currencyconversion.model.ExchangeRateDTO;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -14,22 +13,23 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 /**
- *
- * @author Emil
+ *Needs an active transaction
  */
 @TransactionAttribute(TransactionAttributeType.MANDATORY)
 @Stateless
 public class ConversionDAO {
     @PersistenceContext(unitName = "converterPU")
     private EntityManager em;
-    
+    //Finds a rate using the name as the key 
     public ExchangeRate getExrate(String fromCurr){
        return em.find(ExchangeRate.class, fromCurr);
     }
+    
+    //Used only to insert values into the database
     public void storerate(){
         ExchangeRate curr = new ExchangeRate("GBP", 1);
         em.persist(curr);
-        ExchangeRate curr1 = new ExchangeRate("BTC", 11969.01);
+        ExchangeRate curr1 = new ExchangeRate("BTC", 0.0000871235);
         em.persist(curr1);
         ExchangeRate curr2 = new ExchangeRate("EUR", 1.14);
         em.persist(curr2);

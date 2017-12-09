@@ -10,8 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 /**
- *
- * @author Emil
+ * An object of a currency with a name and a rate
  */
 @Entity
 public class ExchangeRate implements ExchangeRateDTO, Serializable {

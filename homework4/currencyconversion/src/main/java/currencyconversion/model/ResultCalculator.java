@@ -5,16 +5,11 @@
  */
 package currencyconversion.model;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 
 /**
- *
- * @author Emil
+* Calculates the result of the conversion and returns it in an object with a double with 2 digits
  */
-@TransactionAttribute(TransactionAttributeType.MANDATORY)
-@Stateless
+
 public class ResultCalculator {
     
     public ExchangeRateDTO calculate(ExchangeRate from, ExchangeRate to, double amount){

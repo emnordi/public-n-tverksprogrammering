@@ -6,8 +6,7 @@
 package currencyconversion.model;
 
 /**
- *
- * @author Emil
+ * A DTO for the ExchangeRate object
  */
 public interface ExchangeRateDTO {
  

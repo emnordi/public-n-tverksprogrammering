@@ -26,6 +26,10 @@ public class Controller {
     ConversionDAO cdao;
     @EJB
     ResultCalculator res;
+    /*
+    * Calls the ConversionDAO to get the rates for the to and from currencies
+    * then calculates the amount and returns it as an DTO object
+    */
     public ExchangeRateDTO convert(String fromCurr, String toCurr, double fromAmount) {
         ExchangeRate from = cdao.getExrate(fromCurr);
         ExchangeRate to = cdao.getExrate(toCurr);

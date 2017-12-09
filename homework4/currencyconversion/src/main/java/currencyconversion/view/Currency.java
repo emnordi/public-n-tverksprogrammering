@@ -6,6 +6,7 @@
 package currencyconversion.view;
 
 import currencyconversion.controller.Controller;
+import currencyconversion.model.ExchangeRateDTO;
 import java.io.Serializable;
 import javax.ejb.EJB;
 import javax.enterprise.context.Conversation;
@@ -23,8 +24,9 @@ public class Currency implements Serializable {
 
     @EJB
     private Controller controller;
-    private double fromAmount;
-    private double toAmount;
+    private Double fromAmount = null;
+    private Double toAmount = null;
+    private String toCurrency;
     private String fromCurr;
     private String toCurr;
 
@@ -41,35 +43,42 @@ public class Currency implements Serializable {
         }
     }
     public String getFromCurr() {
-        return null;
+        return fromCurr;
     }
     
     public void setFromCurr(String fromCurr) {
         this.fromCurr = fromCurr;
     }
-
+    //Get the currency the user converted to
     public String getToCurr() {
-        return null;
+        return toCurr;
     }
-    
+    //Set the currency the user wants to convert to
     public void setToCurr(String toCurr) {
         this.toCurr = toCurr;
     }
-
-    public double getToAmount() {
+    //Get amount user fronverts
+    public Double getToAmount() {
         return toAmount;
     }
-
-    public double getFromAmount() {
-        return 0;
+    //Get currency the user converted to
+    public String getToCurrency() {
+        return toCurrency;
     }
-    public void setFromAmount(double fromAmount) {
+    //Get the amount user converted from
+    public Double getFromAmount() {
+        return fromAmount;
+    }
+    //Sets the amount the users wants to convert
+    public void setFromAmount(Double fromAmount) {
         this.fromAmount = fromAmount;
     }
-
+    //Called on when user presses button to convert
     public void convert() {
        startConversation();
-       toAmount = controller.convert(fromCurr, toCurr, fromAmount).getRate();
+       ExchangeRateDTO ans = controller.convert(fromCurr, toCurr, fromAmount);
+       toAmount = ans.getRate();
+       toCurrency = ans.getCurrency();
     }
 
 }
