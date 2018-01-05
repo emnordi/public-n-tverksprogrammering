@@ -29,7 +29,7 @@ public class ConversionDAO {
     public void storerate(){
         ExchangeRate curr = new ExchangeRate("GBP", 1);
         em.persist(curr);
-        ExchangeRate curr1 = new ExchangeRate("BTC", 0.0000871235);
+        ExchangeRate curr1 = new ExchangeRate("BTC", 0.00008712);
         em.persist(curr1);
         ExchangeRate curr2 = new ExchangeRate("EUR", 1.14);
         em.persist(curr2);

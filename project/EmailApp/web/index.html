@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Email Application</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form> 
+            <input id="userName" type="text">
+            <input id="password" type="text">
+            <input onClick="login();" value="Login" type="button">
+            <input onClick="register();" value="Register" type="button">
+        </form>
+        <br>
+        <form>
+            To:
+            <input id="recipient" type="text"><br>
+            Subject:
+            <input id="subject" type="text"><br>
+            Message:
+            <input id="textMessage" type="text"><br>
+            <input onClick="sendMessage();" value="Send mail" type="button">
+        </form>
+        <br><textarea id="messageArea" rows="10" cols="50"></textarea>
+        <script src="websocket.js"></script>
+         
+        <h3> recieved </h3>
+        <div id="recieved">
+        </div>
+    </body>
+</html>

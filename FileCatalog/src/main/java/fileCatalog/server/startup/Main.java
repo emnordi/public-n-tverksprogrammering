@@ -10,7 +10,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import fileCatalog.server.controller.Controller;
-import fileCatalog.server.integration.FileDAO;
 import java.net.MalformedURLException;
 /**
  *
