@@ -36,7 +36,7 @@ public class Server {
 
     @OnClose
     public void handleClose(Session session) {
-        sessionHandler.removeUser(session);
+        
         System.out.println("Client disconnected..");
     }
 
@@ -56,6 +56,13 @@ public class Server {
                 case "login":
                     User user = new User(jsonMessage.getString("user"), session, jsonMessage.getString("password"));
                     sessionHandler.addUser(user);
+                    break;
+                case "relog":
+                    User u = sessionHandler.getUser(jsonMessage.getString("user"), session);
+                    sessionHandler.startupMails(u);
+                    break;
+                case "logout":
+                    sessionHandler.removeUser(session);
                     break;
 
                 case "register":

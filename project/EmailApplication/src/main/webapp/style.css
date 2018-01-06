@@ -6,14 +6,38 @@ body {
     color: #d9d9d9;
 
 }
+input[type=text], select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=button] {
+    width: 100%;
+    background-color: #0f90d1;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=button]:hover {
+    background-color: #0d84bf;
+}
 
 #Recieved {
-    margin-top: 10em;
+    margin-top: 8em;
     float: left;
     display: inline-block;
 }
 #Sent {
-    margin-top: 10em;
+    margin-top: 8em;
     display:inline-block;
 }
 .email {
@@ -37,4 +61,40 @@ body {
 }
 .email.Sent {
     background-color: #db524d;
+}
+
+.alert-box {
+    color:#555;
+    border-radius:10px;
+    font-family:Tahoma,Geneva,Arial,sans-serif;
+    font-size:11px;
+    padding:10px 10px 10px 36px;
+    margin:10px;
+    float: right;
+}
+
+.alert-box span {
+    font-weight:bold;
+    text-transform:uppercase;
+}
+.alert-box.success {
+    background:#e9ffd9 url('images/success.png') no-repeat 10px 50%;
+    border:1px solid #a6ca8a;
+}
+
+#usermenu span{
+  font-size: 20px;
+  margin-top: 1em;
+  float: left;
+}
+
+#userMenu .logoff {
+    font-size: 15px;
+    margin-left: 2em;
+    display: inline-block;
+    background-color: gainsboro;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    display: inline;
 }

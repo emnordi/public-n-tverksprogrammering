@@ -25,15 +25,12 @@ public class SessionHandler {
     //Stores active session
     private final Set<User> users = new HashSet<>();
     private final Set<String> msgs = new HashSet<>();
-    //Stores emails until db is setup
-    private final Set<Email> emails = new HashSet<>();
     private Session reciever;
     private Session sender;
     private EmailData ed;
     private EmailData eds;
     private Set<EmailData> rmails;
     private Set<EmailData> smails;
-
 //Add user
     public void addUser(User newUser) {
         JsonProvider provider = JsonProvider.provider();
@@ -41,7 +38,8 @@ public class SessionHandler {
         if (cont.authenticateUser(newUser)) {
             users.add(newUser);
             msg = provider.createObjectBuilder()
-                    .add("kind", "msg")
+                    .add("kind", "Login")
+                    .add("user", newUser.getUsername())
                     .add("message", "Logged on").build();
             
             startupMails(newUser);
@@ -51,6 +49,21 @@ public class SessionHandler {
                     .add("message", "Invalid credentials, try again!").build();
         }
         sendToOneSession(newUser.getSession(), msg);
+    }
+    
+    public User getUser(String username, Session session){
+        User user = null;
+        for(User u : users){
+            if(u.getUsername().equals(username)){
+                u.setSession(session);
+                user = u;
+            }
+        }
+        if(user == null){
+            user = new User(username, session, " ");
+            users.add(user);
+        }
+        return user;
     }
 
     public void registerUser(User newUser) {
@@ -68,7 +81,7 @@ public class SessionHandler {
         }
         sendToOneSession(newUser.getSession(), msg);
     }
-
+    
     public void startupMails(User username) {
         rmails = cont.getRecieved(username.getUsername());
         smails = cont.getSent(username.getUsername());
@@ -115,7 +128,6 @@ public class SessionHandler {
     }
 
     public void addMail(Email email, Email sMail) {
-        emails.add(email);
         ed = cont.addMail(email);
         eds = cont.addMail(sMail);
         emailId++;

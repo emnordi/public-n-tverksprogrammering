@@ -8,30 +8,36 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <form> 
-            <input id="userName" type="text">
-            <input id="password" type="text">
+        <div id="userMenu"></div>
+        <div id="loginForm">
+        <form>
+            Username:
+            <input id="userName" type="text" required>
+            Password:
+            <input id="password" type="text" required>
             <input onClick="login();" value="Login" type="button">
             <input onClick="register();" value="Register" type="button">
         </form>
+        </div>
+        <div id="alerts"></div>
         <br>
+        <div id="mailForm">
         <form>
             To:
-            <input id="recipient" type="text"><br>
+            <input id="recipient" type="text" required><br>
             Subject:
-            <input id="subject" type="text"><br>
+            <input id="subject" type="text" required><br>
             Message:
-            <input id="textMessage" type="text"><br>
+            <input id="textMessage" type="text" required><br>
             <input onClick="sendMessage();" value="Send mail" type="button">
         </form>
+        </div>
         <br><textarea id="messageArea" rows="10" cols="130"></textarea>
         <script src="websocket.js"></script>
-         
-        
+
         <div id="Recieved">
             <h3> Recieved </h3>
         </div>
-        
         
         <div id="Sent">
             <h3> Sent </h3>
