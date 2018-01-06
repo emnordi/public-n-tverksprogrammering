@@ -23,6 +23,31 @@ public class EmailDAO {
     private EntityManager em;
     
 
+    public EmailData getMailById(int id){
+        return em.find(EmailData.class, id);
+    }
+    public EmailData toggleMail(int id){
+        String stat;
+        EmailData mail = getMailById(id);
+        if(mail.getStatus().equals("Unread")){
+            stat = "Read";
+        }else{
+            stat = "Unread";
+        }
+        Query query = em.createNativeQuery("Update EmailData SET status = ? WHERE eid = ?");
+        query.setParameter(1, stat);
+        query.setParameter(2, id);
+        int rows = query.executeUpdate();
+        EmailData ed = getMailById(id);
+        if(ed.getStatus().equals("Unread")){
+            ed.setStatus("Read");
+        }else{
+            ed.setStatus("Unread");
+        }
+        System.out.println("New type= " + ed.getStatus());
+        return ed;
+    }
+    
     //Used to insert values into the database
     public EmailData storeMail(Email newMail) {
         EmailData email = new EmailData(newMail.getSender(), newMail.getReciever(), newMail.getStatus(), newMail.getType(), newMail.getSubject(), newMail.getMessage());

@@ -2,24 +2,22 @@ Todo:
 
 Database:
 Add user - DONE
-Delete user ?
 Add email - DONE
 remove email - DONE
-change status of email
+change status of email - DONE
 
 Index:
 Add register form - DONE
 Edit login form - DONE
-add sent
-get all emails at login
+add sent - DONE
+get all emails at login - DONE
 logout
 Reply to mail
 
 Other:
 add sent- DONE
-change from read/unread
+change from read/unread - DONE
 delete mail - DONE
 DESIGN:
 Expandable login form
-Expandable user setting
 Expandable mail

@@ -21,18 +21,7 @@ webSocket.onerror = function (message) {
 webSocket.onmessage = function (message) {
     var email = JSON.parse(message.data);
     if (email.kind == "mail") {
-        if(email.type == "toggle"){
-        var node = document.getElementById(email.id);
-        var statusText = node.children[2];
-        if (device.status === "Unread") {
-            statusText.innerHTML = email.status + " (<a href=\"#\" OnClick=toggleMail(" + email.id + ")>Mark as read</a>)";
-            } else if (device.status === "Read") {
-            status.innerHTML = email.status + " (<a href=\"#\" OnClick=toggleMail(" + email.id + ")>Mark as unread</a>)";
-        }
-        }
-        else{
         printer(email);
-    }
     } else {
         processMessage(email);
     }
@@ -41,13 +30,13 @@ function processOpen(message) {
     messageArea.value += "Connecting to server \n";
 }
 
-function toggleMail(message) {
-    var id = message;
+function toggleMail(id) {
     var toggleMail = {
         type: "toggle",
         id: id
     };
     webSocket.send(JSON.stringify(toggleMail));
+    document.getElementById(id).remove();
 }
 
 function login() {
@@ -87,9 +76,8 @@ function deleteMail(message) {
         type: "remove",
         id: id 
     };
-    webSocket.send(JSON.stringify(remove));
     document.getElementById(id).remove();
-
+    webSocket.send(JSON.stringify(remove));
 }
 function printer(email) {
 
@@ -118,6 +106,7 @@ function printer(email) {
     emailDiv.appendChild(document.createElement("br"));
     
     var status = document.createElement("span");
+    status.setAttribute("class", "stat");
     if (email.status === "Unread") {
         status.innerHTML = email.status + " (<a href=\"#\" OnClick=toggleMail(" + email.id + ")>Mark as read</a>)";
     } else if (email.status === "Read") {

@@ -71,11 +71,7 @@ public class Server {
                     sessionHandler.addMail(newMail, sMail);
                     break;
                 case "toggle":
-                    newMail = new Email(jsonMessage.getString("sender"), jsonMessage.getString("reciever"),
-                            "Unread", "Recieved", jsonMessage.getString("subject"), jsonMessage.getString("message"));
-                    sMail = new Email(jsonMessage.getString("sender"), jsonMessage.getString("reciever"),
-                            "Unread", "Sent", jsonMessage.getString("subject"), jsonMessage.getString("message"));
-                    sessionHandler.addMail(newMail, sMail);
+                    sessionHandler.toggleEmail(jsonMessage.getInt("id"), session);
                     break;
 
                 case "remove":

@@ -59,7 +59,7 @@ public class Server {
         Email newMail = null;
         try (JsonReader reader = Json.createReader(new StringReader(message))) {
             JsonObject jsonMessage = reader.readObject();
-
+            
             if (jsonMessage.getString("type").equals("login")) {
                 User newUser = new User(jsonMessage.getString("user"), session, jsonMessage.getString("password"));
                 sessionHandler.addUser(newUser);

@@ -52,4 +52,8 @@ public class Controller {
         return edao.getMailsForSender(user);
     }
     
+    public EmailData toggleMail(int id){
+        return edao.toggleMail(id);
+    }
+    
 }

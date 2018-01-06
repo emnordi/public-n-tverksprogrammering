@@ -75,7 +75,6 @@ public class SessionHandler {
         if (!rmails.isEmpty()) {
             for (EmailData mail : rmails) {
                 JsonObject addMessage = createMessage(mail);
-                System.out.println(addMessage.toString());
                 sendToOneSession(username.getSession(), addMessage);
             }
         }
@@ -96,23 +95,12 @@ public class SessionHandler {
         }
     }
 
-    public void toggleEmail(int id) {
-        JsonProvider provider = JsonProvider.provider();
-        Device device = getDeviceById(id);
-        if (device != null) {
-            if ("On".equals(device.getStatus())) {
-                device.setStatus("Off");
-            } else {
-                device.setStatus("On");
-            }
-            JsonObject updateDevMessage = provider.createObjectBuilder()
-                    .add("action", "toggle")
-                    .add("id", device.getId())
-                    .add("status", device.getStatus())
-                    .build();
-            sendToAllConnectedSessions(updateDevMessage);
+    public void toggleEmail(int id, Session session) {
+        EmailData mail = cont.toggleMail(id);
+        JsonObject addMessage = createMessage(mail);
+        sendToOneSession(session, addMessage);
         }
-    }
+    
     
     private void sendToOneSession(Session session, JsonObject message) {
         try {
@@ -142,7 +130,6 @@ public class SessionHandler {
                 JsonObject addMessage = createMessage(eds);
                 sendToOneSession(sender, addMessage);
             }
-//hello piglet. i love you
         }
     }
 
