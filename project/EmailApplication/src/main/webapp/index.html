@@ -9,17 +9,18 @@
     </head>
     <body>
         <div id="userMenu"></div>
+        <div id="alerts"></div>
         <div id="loginForm">
         <form>
             Username:
             <input id="userName" type="text" required>
             Password:
-            <input id="password" type="text" required>
+            <input id="password" type="password" required>
             <input onClick="login();" value="Login" type="button">
             <input onClick="register();" value="Register" type="button">
         </form>
         </div>
-        <div id="alerts"></div>
+        
         <br>
         <div id="mailForm">
         <form>
@@ -32,7 +33,7 @@
             <input onClick="sendMessage();" value="Send mail" type="button">
         </form>
         </div>
-        <br><textarea id="messageArea" rows="10" cols="130"></textarea>
+        <!--<br><textarea id="messageArea" rows="10" cols="130"></textarea> -->
         <script src="websocket.js"></script>
 
         <div id="Recieved">

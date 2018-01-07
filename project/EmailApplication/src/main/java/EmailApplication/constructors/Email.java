@@ -1,4 +1,4 @@
-package EmailApplication.both;
+package EmailApplication.constructors;
 
 public class Email {
 

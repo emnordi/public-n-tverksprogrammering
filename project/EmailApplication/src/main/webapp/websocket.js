@@ -1,6 +1,5 @@
 var webSocket = new WebSocket("ws://localhost:8080/EmailApplication/actions");
 console.log(localStorage.getItem("user"));
-var messageArea = document.getElementById("messageArea");
 var textMessage = document.getElementById("textMessage");
 var userName = document.getElementById("userName");
 var password = document.getElementById("password");
@@ -26,21 +25,39 @@ webSocket.onclose = function (message) {
     processClose(message);
 };
 webSocket.onerror = function (message) {
-    processError(message);
+    errorMessage("Cannot connect to server");
 };
 webSocket.onmessage = function (message) {
     var email = JSON.parse(message.data);
-    if (email.kind == "mail") {
+    switch(email.kind){
+        case("mail"):
         hideLoginForm();
         showMailForm();
         showSRForm();
         printer(email);
-    } else if(email.kind == "Login"){
+        break;
+        
+        case("login"):
         localStorage.setItem("user", email.user.toString());
         loginMsg();
-        processMessage(email);
-    } else{
+        break;
         
+        case("register"):
+        localStorage.setItem("user", email.user.toString());
+        loginMsg();
+        break;
+        
+        case("error"):
+        errorMessage(email.message);
+        break;
+        
+        case("success"):
+        successMessage(email.message);
+        break;
+        
+        case("msg"):
+        infoMessage(email.message);
+        break;
     }
 };
 
@@ -60,7 +77,7 @@ function loginMsg() {
     
     var logout = document.createElement("button");
     logout.setAttribute("class", "logoff");
-    logout.innerHTML = "<a href=\"#\" OnClick=logoutFromApp(" + localStorage.getItem("user") + ")>Logout</a>";
+    logout.innerHTML = "<a href=\"#\" OnClick=logoutFromApp()>Logout</a>";
     userDiv.appendChild(logout);
     
     }
@@ -74,7 +91,31 @@ function successMessage(message){
     
     setTimeout(function () {
         document.getElementById('alertbo').style.display='none';
-    }, 10000);
+    }, 5000);
+};
+function errorMessage(message){    
+    var ab = document.getElementById("alerts");
+    var msg = document.createElement("span");
+    msg.setAttribute("id", "alertbo");
+    msg.setAttribute("class", "alert-box error");
+    msg.innerHTML = message;
+    ab.appendChild(msg);
+    
+    setTimeout(function () {
+        document.getElementById('alertbo').style.display='none';
+    }, 5000);
+};
+function infoMessage(message){
+    var ab = document.getElementById("alerts");
+    var msg = document.createElement("span");
+    msg.setAttribute("id", "alertbo");
+    msg.setAttribute("class", "alert-box info");
+    msg.innerHTML = message;
+    ab.appendChild(msg);
+    
+    setTimeout(function () {
+        document.getElementById('alertbo').style.display='none';
+    }, 5000);
 };
 
 
@@ -96,19 +137,24 @@ function login() {
         password: password.value
     };
     webSocket.send(JSON.stringify(login));
+    
+    userName.value = "";
+    password.value = "";
   } else {
     alert("Please fill in the required username and password fields");
   }
     
 }
 
-function logoutFromApp(email){
+function logoutFromApp(){
     var logout = {
         type: "logout",
         user: localStorage.getItem("user")
     };
     webSocket.send(JSON.stringify(logout));
     localStorage.removeItem("user");
+    successMessage("Logged out, bye!");
+    document.getElementById("userMenu").remove();
     hideMailForm();
     hideSRForm();
     showLoginForm();
@@ -136,12 +182,15 @@ function sendMessage() {
             message: textMessage.value
         };
         webSocket.send(JSON.stringify(mail));
-        messageArea.value += "Sending to serv: " + textMessage.value + "\n";
         textMessage.value = "";
         subject.value = "";
         reciever.value = "";
-         successMessage("Email Sent sucessfully!");
+        successMessage("Email Sent sucessfully!");
 
+}
+function replyToMail(email){
+    reciever.value = email.from;
+    subject.value = "re: " + email.subject;
 }
 function deleteMail(message) {
     var id = message;
@@ -155,14 +204,19 @@ function deleteMail(message) {
 function printer(email) {
 
     var recieved = document.getElementById(email.type);
+    
     var emailDiv = document.createElement("div");
     emailDiv.setAttribute("id", email.id);
     emailDiv.setAttribute("class", "email " + email.type);
     recieved.appendChild(emailDiv);
-    
+       
     var from = document.createElement("span");
-    from.setAttribute("class", "emailSR");
-    from.innerHTML = "Sender: " + email.from;
+    from.setAttribute("class", "stat");
+    if (email.type === "Recieved") {
+        from.innerHTML = "Sender: " + email.from;
+    } else if (email.type === "Sent") {
+        from.innerHTML = "Sent to: " + email.to;
+    }
     emailDiv.appendChild(from);
     emailDiv.appendChild(document.createElement("br"));
     
@@ -188,8 +242,13 @@ function printer(email) {
     emailDiv.appendChild(status);
     emailDiv.appendChild(document.createElement("br"));
     
+    var reply = document.createElement("span");
+    reply.innerHTML = "<a href=\"#\" OnClick=replyToMail(" + email + ") ><b>Reply </b></a>";
+    emailDiv.appendChild(reply);
+    emailDiv.appendChild(document.createElement("br"));
+    
     var delMail = document.createElement("span");
-    delMail.innerHTML = "(<a href=\"#\" OnClick=deleteMail(" + email.id + ") ><b>Delete email</b></a>)";
+    delMail.innerHTML = "<a href=\"#\" OnClick=deleteMail(" + email.id + ") ><b>Delete email</b></a>";
     emailDiv.appendChild(delMail);
 }
 
@@ -214,15 +273,8 @@ function showSRForm(){
     document.getElementById("Sent").style.display = '';
 }
 
-function processMessage(message) {
-    messageArea.value += "From serv: " + message.message + "\n";
-}
 
 function processClose(message) {
-    webSocket.send("client dcd");
-    messageArea.value += "Server disconnecting.. \n";
+    errorMessage("Can not connect to server, try again later!");
     webSocket.close();
-}
-function processError(message) {
-    messageArea.value += "error.. \n";
 }

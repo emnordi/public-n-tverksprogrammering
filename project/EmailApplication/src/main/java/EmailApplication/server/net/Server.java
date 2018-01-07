@@ -5,8 +5,8 @@
  */
 package EmailApplication.server.net;
 
-import EmailApplication.both.Email;
-import EmailApplication.both.User;
+import EmailApplication.constructors.Email;
+import EmailApplication.constructors.User;
 import java.io.StringReader;
 import javax.inject.Inject;
 import javax.json.Json;
@@ -36,7 +36,6 @@ public class Server {
 
     @OnClose
     public void handleClose(Session session) {
-        
         System.out.println("Client disconnected..");
     }
 
@@ -82,7 +81,7 @@ public class Server {
                     break;
 
                 case "remove":
-                    sessionHandler.removeMail(jsonMessage.getInt("id"));
+                    sessionHandler.removeMail(jsonMessage.getInt("id"), session);
                     break;
 
                 default:

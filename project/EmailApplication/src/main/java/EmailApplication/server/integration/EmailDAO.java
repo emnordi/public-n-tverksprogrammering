@@ -1,10 +1,9 @@
 package EmailApplication.server.integration;
 
-import EmailApplication.both.Email;
-import EmailApplication.both.User;
+import EmailApplication.constructors.Email;
+import EmailApplication.constructors.User;
 import EmailApplication.server.model.EmailData;
 import EmailApplication.server.model.UserData;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,11 +23,17 @@ public class EmailDAO {
     
 
     public EmailData getMailById(int id){
-        return em.find(EmailData.class, id);
+        EmailData toggled = em.find(EmailData.class, id);
+        if(toggled.getStatus().equals("Unread")){
+            toggled.setStatus("Read");
+        }else{
+            toggled.setStatus("Unread");
+        }
+        return toggled;
     }
-    public EmailData toggleMail(int id){
+    public boolean toggleMail(int id){
         String stat;
-        EmailData mail = getMailById(id);
+        EmailData mail = em.find(EmailData.class, id);
         if(mail.getStatus().equals("Unread")){
             stat = "Read";
         }else{
@@ -38,14 +43,11 @@ public class EmailDAO {
         query.setParameter(1, stat);
         query.setParameter(2, id);
         int rows = query.executeUpdate();
-        EmailData ed = getMailById(id);
-        if(ed.getStatus().equals("Unread")){
-            ed.setStatus("Read");
+        if(rows > 0 ){
+            return true;
         }else{
-            ed.setStatus("Unread");
+            return false;
         }
-        System.out.println("New type= " + ed.getStatus());
-        return ed;
     }
     
     //Used to insert values into the database
@@ -55,11 +57,15 @@ public class EmailDAO {
         return email;
     }
 
-    public void removeMail(int id) {
+    public boolean removeMail(int id) {
         Query query = em.createQuery("Delete  from EmailData e where e.eid = :id");
         query.setParameter("id", id);
         int rows = query.executeUpdate();
-        //todo check it was deleted
+        if(rows > 0 ){
+            return true;
+        }else{
+            return false;
+        }
     }
     
     public Set<EmailData> getMailsForUser(String reciever){

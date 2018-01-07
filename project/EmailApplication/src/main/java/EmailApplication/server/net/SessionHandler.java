@@ -1,13 +1,11 @@
 package EmailApplication.server.net;
 
-import EmailApplication.both.Email;
-import EmailApplication.both.User;
+import EmailApplication.constructors.Email;
+import EmailApplication.constructors.User;
 import EmailApplication.server.controller.Controller;
 import EmailApplication.server.model.EmailData;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,7 +22,6 @@ public class SessionHandler {
     private int emailId = 0;
     //Stores active session
     private final Set<User> users = new HashSet<>();
-    private final Set<String> msgs = new HashSet<>();
     private Session reciever;
     private Session sender;
     private EmailData ed;
@@ -38,9 +35,8 @@ public class SessionHandler {
         if (cont.authenticateUser(newUser)) {
             users.add(newUser);
             msg = provider.createObjectBuilder()
-                    .add("kind", "Login")
-                    .add("user", newUser.getUsername())
-                    .add("message", "Logged on").build();
+                    .add("kind", "login")
+                    .add("user", newUser.getUsername()).build();
             
             startupMails(newUser);
         } else {
@@ -72,8 +68,8 @@ public class SessionHandler {
         if (cont.registerUser(newUser)) {
             users.add(newUser);
             msg = provider.createObjectBuilder()
-                    .add("kind", "msg")
-                    .add("message", "You are registered!").build();
+                    .add("kind", "register")
+                    .add("user", newUser.getUsername()).build();
         } else {
             msg = provider.createObjectBuilder()
                     .add("kind", "msg")
@@ -81,7 +77,7 @@ public class SessionHandler {
         }
         sendToOneSession(newUser.getSession(), msg);
     }
-    
+ 
     public void startupMails(User username) {
         rmails = cont.getRecieved(username.getUsername());
         smails = cont.getSent(username.getUsername());
@@ -109,11 +105,18 @@ public class SessionHandler {
     }
 
     public void toggleEmail(int id, Session session) {
-        EmailData mail = cont.toggleMail(id);
-        JsonObject addMessage = createMessage(mail);
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject addMessage;
+                if(cont.toggleMail(id)){
+                    EmailData mail = cont.getMailById(id);
+                    addMessage = createMessage(mail);
+                }else{
+                    addMessage = provider.createObjectBuilder()
+                    .add("kind", "error")
+                    .add("message", "An error occured, mail status could not be updated!").build();
+                }
         sendToOneSession(session, addMessage);
         }
-    
     
     private void sendToOneSession(Session session, JsonObject message) {
         try {
@@ -123,8 +126,19 @@ public class SessionHandler {
         }
     }
 
-    public void removeMail(int id) {
-        cont.removeMail(id);
+    public void removeMail(int id, Session session) {
+        JsonProvider provider = JsonProvider.provider();
+        JsonObject addMessage;
+                if(cont.removeMail(id)){
+                    addMessage = provider.createObjectBuilder()
+                    .add("kind", "success")
+                    .add("message", "Email deleted!").build();
+                }else{
+                    addMessage = provider.createObjectBuilder()
+                    .add("kind", "error")
+                    .add("message", "An error occured, email could not be deleted!").build();
+                }
+        sendToOneSession(session, addMessage);
     }
 
     public void addMail(Email email, Email sMail) {

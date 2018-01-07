@@ -11,13 +11,13 @@ Add register form - DONE
 Edit login form - DONE
 add sent - DONE
 get all emails at login - DONE
-logout
+logout - DONE
 Reply to mail
 
 Other:
 add sent- DONE
 change from read/unread - DONE
 delete mail - DONE
-DESIGN:
+DESIGN: 
 Expandable login form - DONE
 Expandable mail - DONE

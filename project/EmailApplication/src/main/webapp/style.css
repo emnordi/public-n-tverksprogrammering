@@ -16,6 +16,16 @@ input[type=text], select {
     box-sizing: border-box;
 }
 
+input[type=password], select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 input[type=button] {
     width: 100%;
     background-color: #0f90d1;
@@ -78,7 +88,15 @@ input[type=button]:hover {
     text-transform:uppercase;
 }
 .alert-box.success {
-    background:#e9ffd9 url('images/success.png') no-repeat 10px 50%;
+    background:#e9ffd9;
+    border:1px solid #a6ca8a;
+}
+.alert-box.error {
+    background: #db524d;
+    border:1px solid #a6ca8a;
+}
+.alert-box.info {
+    background: #00FFFF;
     border:1px solid #a6ca8a;
 }
 
