@@ -19,7 +19,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
+//WebSocket server endpoint. Here messeges are sent to from client.
 @ServerEndpoint("/actions")
 public class Server {
 
