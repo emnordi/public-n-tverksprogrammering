@@ -99,7 +99,6 @@ function successMessage(message) {
         document.getElementById('alertbo').style.display = 'none';
     }, 5000);
 }
-;
 //Message for unsuccessful actions
 function errorMessage(message) {
     var ab = document.getElementById("alerts");
@@ -113,7 +112,6 @@ function errorMessage(message) {
         document.getElementById('alertbo').style.display = 'none';
     }, 5000);
 }
-;
 //message for information
 function infoMessage(message) {
     var ab = document.getElementById("alerts");
@@ -127,7 +125,6 @@ function infoMessage(message) {
         document.getElementById('alertbo').style.display = 'none';
     }, 5000);
 }
-;
 
 //Toggle unread/read
 function toggleMail(id) {
@@ -201,11 +198,14 @@ function sendMessage() {
     successMessage("Email Sent sucessfully!");
 
 }
+
 //Replying to an email
-function replyToMail(email) {
-    reciever.value = email.from;
-    subject.value = "re: " + email.subject;
+function replyToMail(from, subj) {
+    reciever.value = from;
+    subject.value = "re: " + subj;
+    console.log("test");
 }
+
 //Deleting an email
 function deleteMail(message) {
     var id = message;
@@ -229,7 +229,7 @@ function printer(email) {
     var from = document.createElement("span");
     from.setAttribute("class", "stat");
     if (email.type === "Recieved") {
-        from.innerHTML = "Sender: " + email.from;
+        from.innerHTML = "Sender: " + "<span id='from'>"+email.from+"</span>";
     } else if (email.type === "Sent") {
         from.innerHTML = "Sent to: " + email.to;
     }
@@ -259,7 +259,7 @@ function printer(email) {
     emailDiv.appendChild(document.createElement("br"));
 
     var reply = document.createElement("span");
-    reply.innerHTML = "<a href=\"#\" OnClick=replyToMail(" + JSON.stringify(email) + ") ><b>Reply </b></a>";
+    reply.innerHTML = '<a href=\"#\" OnClick="replyToMail(\''+email.from+'\',\''+email.subject+'\')" ><b>Reply </b></a>';
     emailDiv.appendChild(reply);
     emailDiv.appendChild(document.createElement("br"));
 
