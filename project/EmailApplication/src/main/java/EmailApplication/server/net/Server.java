@@ -19,31 +19,29 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-/**
- *
- * @author Emil
- */
+
 @ServerEndpoint("/actions")
 public class Server {
 
     @Inject
     private SessionHandler sessionHandler;
 
+    //Nothing has to be done on server on open
     @OnOpen
     public void handleOpen(Session session) {
         System.out.println("Client connected..");
     }
-
+    //Nothing has to be done on close, user stays online until logging out
     @OnClose
     public void handleClose(Session session) {
         System.out.println("Client disconnected..");
     }
-
+    //Reports to user if an error occurs
     @OnError
-    public void handleError(Throwable error) {
-        error.printStackTrace();
+    public void handleError(Throwable error, Session session) {
+        sessionHandler.errorMsg(session);
     }
-
+    //Handle messages sent from client
     @OnMessage
     public void handleMessage(String message, Session session) {
         Email newMail = null;

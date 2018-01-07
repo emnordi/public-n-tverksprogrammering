@@ -101,9 +101,9 @@ input[type=button]:hover {
 }
 
 #usermenu span{
-  font-size: 20px;
-  margin-top: 1em;
-  float: left;
+    font-size: 20px;
+    margin-top: 1em;
+    float: left;
 }
 
 #userMenu .logoff {

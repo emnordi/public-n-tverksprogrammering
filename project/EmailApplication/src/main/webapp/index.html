@@ -11,35 +11,34 @@
         <div id="userMenu"></div>
         <div id="alerts"></div>
         <div id="loginForm">
-        <form>
-            Username:
-            <input id="userName" type="text" required>
-            Password:
-            <input id="password" type="password" required>
-            <input onClick="login();" value="Login" type="button">
-            <input onClick="register();" value="Register" type="button">
-        </form>
+            <form>
+                Username:
+                <input id="userName" type="text" required>
+                Password:
+                <input id="password" type="password" required>
+                <input onClick="login();" value="Login" type="button">
+                <input onClick="register();" value="Register" type="button">
+            </form>
         </div>
-        
+
         <br>
         <div id="mailForm">
-        <form>
-            To:
-            <input id="recipient" type="text" required><br>
-            Subject:
-            <input id="subject" type="text" required><br>
-            Message:
-            <input id="textMessage" type="text" required><br>
-            <input onClick="sendMessage();" value="Send mail" type="button">
-        </form>
+            <form>
+                To:
+                <input id="recipient" type="text" required><br>
+                Subject:
+                <input id="subject" type="text" required><br>
+                Message:
+                <input id="textMessage" type="text" required><br>
+                <input onClick="sendMessage();" value="Send mail" type="button">
+            </form>
         </div>
-        <!--<br><textarea id="messageArea" rows="10" cols="130"></textarea> -->
         <script src="websocket.js"></script>
 
         <div id="Recieved">
             <h3> Recieved </h3>
         </div>
-        
+
         <div id="Sent">
             <h3> Sent </h3>
         </div>

@@ -1,8 +1,8 @@
 package EmailApplication.constructors;
 
+//Holds email information
 public class Email {
 
-   // private int id;
     //Person sending mail
     private String sender;
     //Person recieving mail
@@ -47,11 +47,6 @@ public class Email {
     public String getType() {
         return type;
     }
-
-    /*
-    public void setId(int id) {
-        this.id = id;
-    }*/
     
     public void setSender(String sender) {
         this.sender = sender;
